@@ -14,7 +14,7 @@ public class Canvas extends JComponent implements ActionListener {
     int canvasHeight;
     int cellGridXdim;
     int cellGridYdim;
-    int[][] cellsGrid;
+    int[][][] cellsGrid;
 
     boolean automataRunning = false;
     Timer animationTimer;
@@ -26,23 +26,23 @@ public class Canvas extends JComponent implements ActionListener {
         canvasHeight = canvasHeightVal;
         cellGridXdim = canvasWidth / 10;
         cellGridYdim = canvasHeight / 10;
-        cellsGrid = instanceBlankCellGrid();
-    }
-
-    private int[][] instanceBlankCellGrid() {
-        int[][] localCellsGrid = new int[cellGridXdim][cellGridYdim];
+        cellsGrid = new int[cellGridXdim][cellGridYdim][2];
 
         for (int xIndex = 0; xIndex < cellGridXdim; xIndex++) {
             for (int yIndex = 0; yIndex < cellGridYdim; yIndex++) {
-                localCellsGrid[xIndex][yIndex] = 0;
+                cellsGrid[xIndex][yIndex][0] = 0;
             }
         }
 
-        return localCellsGrid;
+        System.out.println("X dimension: " + cellGridXdim + "; Y dimension: " + cellGridYdim);
     }
 
     public void clearCellGrid() {
-        cellsGrid = instanceBlankCellGrid();
+        for (int xIndex = 0; xIndex < cellGridXdim; xIndex++) {
+            for (int yIndex = 0; yIndex < cellGridYdim; yIndex++) {
+                cellsGrid[xIndex][yIndex][0] = 0;
+            }
+        }
     }
 
     protected void paintComponent(Graphics graphics) {
@@ -51,7 +51,7 @@ public class Canvas extends JComponent implements ActionListener {
         graphics.setColor(Color.BLACK);
         for (int xIndex = 0; xIndex < cellGridXdim; xIndex++) {
             for (int yIndex = 0; yIndex < cellGridYdim; yIndex++) {
-                if (cellsGrid[xIndex][yIndex] == 1) {
+                if (cellsGrid[xIndex][yIndex][0] == 1) {
                     graphics.fillRect(xIndex * 10, yIndex * 10, 10, 10);
                 }
             }
@@ -64,7 +64,7 @@ public class Canvas extends JComponent implements ActionListener {
         for (int xIndex = 0; xIndex < cellGridXdim; xIndex++) {
             for (int yIndex = 0; yIndex < cellGridYdim; yIndex++) {
                 if ((int) Math.floor((double) randomInts.next() / (double) Integer.MAX_VALUE * 8) == 0) {
-                    cellsGrid[xIndex][yIndex] = 1;
+                    cellsGrid[xIndex][yIndex][0] = 1;
                 }
             }
         }
@@ -94,8 +94,6 @@ public class Canvas extends JComponent implements ActionListener {
 
     public void actionPerformed(ActionEvent event) {
         if (event.getActionCommand().equals("repaint")) {
-            int[][] newCellsGrid = instanceBlankCellGrid();
-
             for (int xIndex = 0; xIndex < cellGridXdim; xIndex++) {
                 for (int yIndex = 0; yIndex < cellGridYdim; yIndex++) {
                     int sumOfNeighbors = 0;
@@ -111,24 +109,30 @@ public class Canvas extends JComponent implements ActionListener {
                                     || moddedYIndex == -1 || moddedYIndex == cellGridYdim) {
                                 continue;
                             }
-                            sumOfNeighbors += cellsGrid[moddedXIndex][moddedYIndex];
+                            sumOfNeighbors += cellsGrid[moddedXIndex][moddedYIndex][0];
                         }
                     }
 
-                    if (cellsGrid[xIndex][yIndex] == 1) {
+                    if (cellsGrid[xIndex][yIndex][0] == 1) {
                         if (sumOfNeighbors < 2 || sumOfNeighbors > 3) {
-                            newCellsGrid[xIndex][yIndex] = 0;
+                            cellsGrid[xIndex][yIndex][1] = 0;
                         } else {
-                            newCellsGrid[xIndex][yIndex] = 1;
+                            cellsGrid[xIndex][yIndex][1] = 1;
                         }
                     } else if (sumOfNeighbors == 3) {
-                        newCellsGrid[xIndex][yIndex] = 1;
+                        cellsGrid[xIndex][yIndex][1] = 1;
                     } else {
-                        newCellsGrid[xIndex][yIndex] = 0;
+                        cellsGrid[xIndex][yIndex][1] = 0;
                     }
                 }
             }
-            cellsGrid = newCellsGrid;
+
+            for (int xIndex = 0; xIndex < cellGridXdim; xIndex++) {
+                for (int yIndex = 0; yIndex < cellGridYdim; yIndex++) {
+                    cellsGrid[xIndex][yIndex][0] = cellsGrid[xIndex][yIndex][1];
+                }
+            }
+
             repaint();
         }
     }

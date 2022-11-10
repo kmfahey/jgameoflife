@@ -7,41 +7,84 @@ import java.awt.event.ActionListener;
 
 public class GameOfLife extends JFrame {
 
-    GridBagLayout gameLayout = new GridBagLayout();
-    JPanel gamePane = new JPanel(gameLayout);
+    GroupLayout gameLayout;
+    JPanel gamePane = new JPanel();
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Canvas canvas;
 
     public GameOfLife() {
         super("Conway's Game of Life");
 
-        JButton startButton;
-        int reducedWidth = (int) Math.floor(0.8D * (double) screenSize.getWidth());
-        int reducedHeight = (int) Math.floor(0.8D * (double) screenSize.getHeight());
-        int widthFifth = (int) ((float) reducedWidth * 0.2F);
-        int heightTenth = (int) Math.floor(0.1D * (double) reducedHeight);
-        int heightNineTenths = reducedHeight - heightTenth;
-
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
 
-        gameLayout.columnWidths = new int[] { widthFifth, widthFifth, widthFifth, widthFifth, widthFifth };
-        gameLayout.rowHeights = new int[] { heightNineTenths, heightTenth };
+        int windowWidth = (int) Math.floor(0.9D * (double) screenSize.getWidth());
+        int windowHeight = (int) Math.floor(0.9D * (double) screenSize.getHeight());
 
-        GridBagConstraints canvasConstraints = buildCanvasConstraints(0, 0, 1, 5, reducedWidth, heightNineTenths);
-        int modifiedHeight = reducedHeight - canvasConstraints.insets.top - canvasConstraints.insets.bottom;
-        int modifiedWidth = reducedWidth - canvasConstraints.insets.left - canvasConstraints.insets.right;
-        canvas = new Canvas(modifiedWidth, modifiedHeight);
-        gamePane.add(canvas, buildCanvasConstraints(0, 0, 1, 5, reducedWidth, heightNineTenths));
+        gamePane.setSize(windowWidth, windowHeight);
 
-        startButton = buildStartButton();
+        int buttonRegionWidth = (int) ((float) windowWidth * 0.2F);
+        int buttonRegionHeight = (int) Math.floor(0.1D * (double) windowHeight);
+        int canvasRegionHeight = windowHeight - buttonRegionHeight;
+        int canvasVertPadding = 20 + (int) Math.floor((double) canvasRegionHeight % 10D * 0.5D);
+        int canvasHorizPadding = 20 + (int) Math.floor((double) windowWidth % 10D * 0.5D);
+        int canvasWidth = windowWidth - canvasHorizPadding * 2;
+        int canvasHeight = windowHeight - buttonRegionHeight - canvasVertPadding * 2;
+        int buttonHorizPadding = (int) Math.floor((double) buttonRegionWidth * 0.25D);
+        int buttonVertPadding = (int) Math.floor((double) buttonRegionHeight * 0.25D);
+        int buttonWidth = buttonRegionWidth - 2 * buttonHorizPadding;
+        int buttonHeight = buttonRegionHeight - 2 * buttonVertPadding;
 
-        gamePane.add(buildClearButton(startButton), buildButtonConstraints(1, 2, 1, 1, widthFifth, heightTenth));
-        gamePane.add(buildSeedButton(), buildButtonConstraints(1, 3, 1, 1, widthFifth, heightTenth));
-        gamePane.add(startButton, buildButtonConstraints(1, 4, 1, 1, widthFifth, heightTenth));
+        gameLayout = new GroupLayout(gamePane);
+        gamePane.setLayout(gameLayout);
+
+        JButton startButton = buildStartButton();
+        JButton seedButton = buildSeedButton();
+        JButton clearButton = buildClearButton(startButton);
+        clearButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
+        seedButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
+        startButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
+        clearButton.setMaximumSize(new Dimension(buttonWidth, buttonHeight));
+        seedButton.setMaximumSize(new Dimension(buttonWidth, buttonHeight));
+        startButton.setMaximumSize(new Dimension(buttonWidth, buttonHeight));
+
+        canvas = new Canvas(canvasWidth, canvasHeight);
+        canvas.setPreferredSize(new Dimension(canvasWidth, canvasHeight));
+        canvas.setMaximumSize(new Dimension(canvasWidth, canvasHeight));
+
+        int PREF_SZ = GroupLayout.PREFERRED_SIZE;
+
+        gameLayout.setHorizontalGroup(gameLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                                .addGap(canvasHorizPadding)
+                                                .addGroup(gameLayout.createSequentialGroup()
+                                                                    .addGap(canvasHorizPadding)
+                                                                    .addComponent(canvas, PREF_SZ, PREF_SZ, PREF_SZ))
+                                                .addGroup(gameLayout.createSequentialGroup()
+                                                                    .addGap(buttonHorizPadding)
+                                                                    .addGroup(gameLayout.createSequentialGroup()
+                                                                                        .addGap(buttonHorizPadding)
+                                                                                        .addComponent(clearButton, PREF_SZ, PREF_SZ, PREF_SZ))
+                                                                    .addGroup(gameLayout.createSequentialGroup()
+                                                                                        .addGap(buttonHorizPadding)
+                                                                                        .addComponent(seedButton, PREF_SZ, PREF_SZ, PREF_SZ))
+                                                                    .addGroup(gameLayout.createSequentialGroup()
+                                                                                        .addGap(buttonHorizPadding)
+                                                                                        .addComponent(startButton, PREF_SZ, PREF_SZ, PREF_SZ))));
+
+
+        gameLayout.setVerticalGroup(gameLayout.createSequentialGroup()
+                                              .addGap(canvasVertPadding)
+                                              .addGroup(gameLayout.createSequentialGroup()
+                                                                  .addComponent(canvas))
+                                                                  .addGap(canvasVertPadding)
+                                              .addGroup(gameLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                                                  .addGap(buttonVertPadding)
+                                                                  .addComponent(clearButton, PREF_SZ, PREF_SZ, PREF_SZ)
+                                                                  .addComponent(seedButton, PREF_SZ, PREF_SZ, PREF_SZ)
+                                                                  .addComponent(startButton, PREF_SZ, PREF_SZ, PREF_SZ)));
 
         setContentPane(gamePane);
-        setSize(reducedWidth, reducedHeight);
+        setSize(windowWidth, windowHeight);
     }
 
     private GridBagConstraints buildConstraints(int row, int col, int rowspan, int colspan) {
@@ -51,28 +94,6 @@ public class GameOfLife extends JFrame {
         gameConstraints.gridx = col;
         gameConstraints.gridheight = rowspan;
         gameConstraints.gridwidth = colspan;
-        return gameConstraints;
-    }
-
-    private GridBagConstraints buildCanvasConstraints(int row, int col, int rowspan, int colspan, int containerWidth, int containerHeight) {
-        GridBagConstraints gameConstraints;
-        int widthExtra = containerWidth % 10;
-        int heightExtra = containerHeight % 10;
-        int topInset = 20 + (int) Math.floor((double) widthExtra / 2.0);
-        int bottomInset = 0 + (int) Math.ceil((double) widthExtra / 2.0);
-        int leftInset = 20 + (int) Math.floor((double) heightExtra / 2.0);
-        int rightInset = 20 + (int) Math.ceil((double) heightExtra / 2.0);
-        gameConstraints = buildConstraints(row, col, rowspan, colspan);
-        gameConstraints.insets = new Insets(topInset, leftInset, bottomInset, rightInset);
-        return gameConstraints;
-    }
-
-    private GridBagConstraints buildButtonConstraints(int row, int col, int rowspan, int colspan, int containerWidth, int containerHeight) {
-        GridBagConstraints gameConstraints;
-        int widthThird = (int) ((float) containerWidth / 3.0F);
-        int heightThird = (int) ((float) containerHeight / 3.0F);
-        gameConstraints = buildConstraints(row, col, rowspan, colspan);
-        gameConstraints.insets = new Insets(heightThird, widthThird, heightThird, widthThird);
         return gameConstraints;
     }
 
