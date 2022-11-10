@@ -7,7 +7,7 @@ import java.awt.event.ActionListener;
 
 public class Canvas extends JComponent implements ActionListener {
 
-    Color fieldColor = Color.GRAY;
+    Color fieldColor = Color.WHITE;
 
     protected void paintComponent(Graphics graphics) {
         graphics.setColor(fieldColor);
