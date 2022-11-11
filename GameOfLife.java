@@ -7,81 +7,59 @@ import java.awt.event.ActionListener;
 
 public class GameOfLife extends JFrame {
 
-    GroupLayout gameLayout;
-    JPanel gamePane = new JPanel();
+    GridBagLayout gameLayout = new GridBagLayout();
+    JPanel gamePane = new JPanel(gameLayout);
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    Canvas canvas;
+    CellGrid cellGrid;
 
     public GameOfLife() {
         super("Conway's Game of Life");
 
+        int windowWidth = (int) Math.floor(0.9D * (double) screenSize.getWidth());
+        int windowHeight = (int) Math.floor(0.9D * (double) screenSize.getHeight());
+        int buttonRegionWidth = (int) ((float) windowWidth * 0.2F);
+        int buttonRegionHeight = (int) Math.floor(0.1D * (double) windowHeight);
+        int cellGridRegionHeight = windowHeight - buttonRegionHeight;
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
 
-        int windowWidth = (int) Math.floor(0.9D * (double) screenSize.getWidth());
-        int windowHeight = (int) Math.floor(0.9D * (double) screenSize.getHeight());
+        gameLayout.columnWidths = new int[] { buttonRegionWidth, buttonRegionWidth, buttonRegionWidth, buttonRegionWidth, buttonRegionWidth };
+        gameLayout.rowHeights = new int[] { cellGridRegionHeight, buttonRegionHeight };
 
-        gamePane.setSize(windowWidth, windowHeight);
+        GridBagConstraints cellGridConstraints = buildCellGridConstraints(0, 0, 1, 5, windowWidth, cellGridRegionHeight);
+        int cellGridHeight = windowHeight - buttonRegionHeight - cellGridConstraints.insets.top - cellGridConstraints.insets.bottom;
+        int cellGridWidth = windowWidth - cellGridConstraints.insets.left - cellGridConstraints.insets.right;
+        cellGrid = new CellGrid(cellGridWidth, cellGridHeight);
+        Dimension cellGridDimensions = new Dimension(cellGridWidth, cellGridHeight);
+        cellGrid.setMinimumSize(cellGridDimensions);
+        cellGrid.setPreferredSize(cellGridDimensions);
+        cellGrid.setMaximumSize(cellGridDimensions);
+        gamePane.add(cellGrid, buildCellGridConstraints(0, 0, 1, 5, windowWidth, cellGridRegionHeight));
 
-        int buttonRegionWidth = (int) ((float) windowWidth * 0.2F);
-        int buttonRegionHeight = (int) Math.floor(0.1D * (double) windowHeight);
-        int canvasRegionHeight = windowHeight - buttonRegionHeight;
-        int canvasVertPadding = 20 + (int) Math.floor((double) canvasRegionHeight % 10D * 0.5D);
-        int canvasHorizPadding = 20 + (int) Math.floor((double) windowWidth % 10D * 0.5D);
-        int canvasWidth = windowWidth - canvasHorizPadding * 2;
-        int canvasHeight = windowHeight - buttonRegionHeight - canvasVertPadding * 2;
-        int buttonHorizPadding = (int) Math.floor((double) buttonRegionWidth * 0.25D);
-        int buttonVertPadding = (int) Math.floor((double) buttonRegionHeight * 0.25D);
-        int buttonWidth = buttonRegionWidth - 2 * buttonHorizPadding;
-        int buttonHeight = buttonRegionHeight - 2 * buttonVertPadding;
-
-        gameLayout = new GroupLayout(gamePane);
-        gamePane.setLayout(gameLayout);
-
+        GridBagConstraints startButtonGridConstraints = buildButtonConstraints(1, 4, 1, 1, buttonRegionWidth, buttonRegionHeight);
+        int buttonHeight = buttonRegionHeight - startButtonGridConstraints.insets.top - startButtonGridConstraints.insets.bottom;
+        int buttonWidth = buttonRegionWidth - startButtonGridConstraints.insets.left - startButtonGridConstraints.insets.right;
+        Dimension buttonDimensions = new Dimension(buttonWidth, buttonHeight);
         JButton startButton = buildStartButton();
-        JButton seedButton = buildSeedButton();
+        startButton.setMinimumSize(buttonDimensions);
+        startButton.setPreferredSize(buttonDimensions);
+        startButton.setMaximumSize(buttonDimensions);
+        gamePane.add(startButton, startButtonGridConstraints);
+
+        GridBagConstraints clearButtonGridConstraints = buildButtonConstraints(1, 2, 1, 1, buttonRegionWidth, buttonRegionHeight);
         JButton clearButton = buildClearButton(startButton);
-        clearButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
-        seedButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
-        startButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
-        clearButton.setMaximumSize(new Dimension(buttonWidth, buttonHeight));
-        seedButton.setMaximumSize(new Dimension(buttonWidth, buttonHeight));
-        startButton.setMaximumSize(new Dimension(buttonWidth, buttonHeight));
+        clearButton.setMinimumSize(buttonDimensions);
+        clearButton.setPreferredSize(buttonDimensions);
+        clearButton.setMaximumSize(buttonDimensions);
+        gamePane.add(clearButton, clearButtonGridConstraints);
 
-        canvas = new Canvas(canvasWidth, canvasHeight);
-        canvas.setPreferredSize(new Dimension(canvasWidth, canvasHeight));
-        canvas.setMaximumSize(new Dimension(canvasWidth, canvasHeight));
-
-        int PREF_SZ = GroupLayout.PREFERRED_SIZE;
-
-        gameLayout.setHorizontalGroup(gameLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                                                .addGap(canvasHorizPadding)
-                                                .addGroup(gameLayout.createSequentialGroup()
-                                                                    .addGap(canvasHorizPadding)
-                                                                    .addComponent(canvas, PREF_SZ, PREF_SZ, PREF_SZ))
-                                                .addGroup(gameLayout.createSequentialGroup()
-                                                                    .addGap(buttonHorizPadding)
-                                                                    .addGroup(gameLayout.createSequentialGroup()
-                                                                                        .addGap(buttonHorizPadding)
-                                                                                        .addComponent(clearButton, PREF_SZ, PREF_SZ, PREF_SZ))
-                                                                    .addGroup(gameLayout.createSequentialGroup()
-                                                                                        .addGap(buttonHorizPadding)
-                                                                                        .addComponent(seedButton, PREF_SZ, PREF_SZ, PREF_SZ))
-                                                                    .addGroup(gameLayout.createSequentialGroup()
-                                                                                        .addGap(buttonHorizPadding)
-                                                                                        .addComponent(startButton, PREF_SZ, PREF_SZ, PREF_SZ))));
-
-
-        gameLayout.setVerticalGroup(gameLayout.createSequentialGroup()
-                                              .addGap(canvasVertPadding)
-                                              .addGroup(gameLayout.createSequentialGroup()
-                                                                  .addComponent(canvas))
-                                                                  .addGap(canvasVertPadding)
-                                              .addGroup(gameLayout.createParallelGroup(GroupLayout.Alignment.TRAILING)
-                                                                  .addGap(buttonVertPadding)
-                                                                  .addComponent(clearButton, PREF_SZ, PREF_SZ, PREF_SZ)
-                                                                  .addComponent(seedButton, PREF_SZ, PREF_SZ, PREF_SZ)
-                                                                  .addComponent(startButton, PREF_SZ, PREF_SZ, PREF_SZ)));
+        GridBagConstraints seedButtonGridConstraints = buildButtonConstraints(1, 3, 1, 1, buttonRegionWidth, buttonRegionHeight);
+        JButton seedButton = buildSeedButton();
+        seedButton.setMinimumSize(buttonDimensions);
+        seedButton.setPreferredSize(buttonDimensions);
+        seedButton.setMaximumSize(buttonDimensions);
+        gamePane.add(seedButton, seedButtonGridConstraints);
 
         setContentPane(gamePane);
         setSize(windowWidth, windowHeight);
@@ -97,19 +75,41 @@ public class GameOfLife extends JFrame {
         return gameConstraints;
     }
 
+    private GridBagConstraints buildCellGridConstraints(int row, int col, int rowspan, int colspan, int containerWidth, int containerHeight) {
+        GridBagConstraints gameConstraints;
+        int widthExtra = containerWidth % 10;
+        int heightExtra = containerHeight % 10;
+        int topInset = 20 + (int) Math.floor((double) widthExtra / 2.0);
+        int bottomInset = 0 + (int) Math.ceil((double) widthExtra / 2.0);
+        int leftInset = 20 + (int) Math.floor((double) heightExtra / 2.0);
+        int rightInset = 20 + (int) Math.ceil((double) heightExtra / 2.0);
+        gameConstraints = buildConstraints(row, col, rowspan, colspan);
+        gameConstraints.insets = new Insets(topInset, leftInset, bottomInset, rightInset);
+        return gameConstraints;
+    }
+
+    private GridBagConstraints buildButtonConstraints(int row, int col, int rowspan, int colspan, int containerWidth, int containerHeight) {
+        GridBagConstraints gameConstraints;
+        int widthFifth = (int) ((float) containerWidth / 5.0F);
+        int heightFifth = (int) ((float) containerHeight / 5.0F);
+        gameConstraints = buildConstraints(row, col, rowspan, colspan);
+        gameConstraints.insets = new Insets(heightFifth, widthFifth, heightFifth, widthFifth);
+        return gameConstraints;
+    }
+
     private JButton buildStartButton() {
         JButton button = new JButton("Start");
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (button.getText() == "Start") {
-                    canvas.startCellularAutomata();
+                    cellGrid.startCellularAutomata();
                     button.setText("Stop");
                 } else {
-                    canvas.stopCellularAutomata();
+                    cellGrid.stopCellularAutomata();
                     button.setText("Start");
                 }
-                canvas.repaint();
+                cellGrid.repaint();
             }
         });
         return button;
@@ -120,8 +120,8 @@ public class GameOfLife extends JFrame {
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                canvas.seedCellGrid();
-                canvas.repaint();
+                cellGrid.seedCellGrid();
+                cellGrid.repaint();
             }
         });
         return button;
@@ -135,8 +135,8 @@ public class GameOfLife extends JFrame {
                 if (startButton.getText() == "Stop") {
                     startButton.doClick();
                 }
-                canvas.clearCellGrid();
-                canvas.repaint();
+                cellGrid.clearCellGrid();
+                cellGrid.repaint();
             }
         });
         return button;
