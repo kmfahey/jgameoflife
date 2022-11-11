@@ -4,10 +4,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseEvent;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.Iterator;
 
-public class CellGrid extends JComponent implements ActionListener {
+public class CellGrid extends JComponent implements ActionListener, MouseListener {
     final int STEP = 250;
     Color fieldColor = Color.WHITE;
     int canvasWidth;
@@ -19,11 +21,9 @@ public class CellGrid extends JComponent implements ActionListener {
     boolean automataRunning = false;
     Timer animationTimer;
 
-    public CellGrid(int canvasWidthVal, int canvasHeightVal) {
-        assert canvasWidth % 10 == 0;
-        assert canvasHeight % 10 == 0;
-        canvasWidth = canvasWidthVal;
-        canvasHeight = canvasHeightVal;
+    public CellGrid(Dimension cellGridDims) {
+        canvasWidth = (int) cellGridDims.getWidth();
+        canvasHeight = (int) cellGridDims.getHeight();
         cellGridXdim = canvasWidth / 10;
         cellGridYdim = canvasHeight / 10;
         cellsGrid = new int[cellGridXdim][cellGridYdim][2];
@@ -52,6 +52,14 @@ public class CellGrid extends JComponent implements ActionListener {
         for (int xIndex = 0; xIndex < cellGridXdim; xIndex++) {
             for (int yIndex = 0; yIndex < cellGridYdim; yIndex++) {
                 if (cellsGrid[xIndex][yIndex][0] == 1) {
+                    graphics.fillRect(xIndex * 10, yIndex * 10, 10, 10);
+                }
+            }
+        }
+        graphics.setColor(Color.WHITE);
+        for (int xIndex = 0; xIndex < cellGridXdim; xIndex++) {
+            for (int yIndex = 0; yIndex < cellGridYdim; yIndex++) {
+                if (cellsGrid[xIndex][yIndex][0] == 0) {
                     graphics.fillRect(xIndex * 10, yIndex * 10, 10, 10);
                 }
             }
@@ -94,41 +102,40 @@ public class CellGrid extends JComponent implements ActionListener {
 
     public void actionPerformed(ActionEvent event) {
         if (event.getActionCommand().equals("repaint")) {
-            for (int xIndex = 0; xIndex < cellGridXdim; xIndex++) {
-                for (int yIndex = 0; yIndex < cellGridYdim; yIndex++) {
-                    int sumOfNeighbors = 0;
-                    int moddedXIndex;
-                    int moddedYIndex;
-
-                    for (int xIndexDelta = -1; xIndexDelta <= 1; xIndexDelta++) {
-                        for (int yIndexDelta = -1; yIndexDelta <= 1; yIndexDelta++) {
+            int sumOfNeighborhood = 0;
+            int moddedXIndex, moddedYIndex;
+            int xIndex, yIndex;
+            int xIndexDelta, yIndexDelta;
+            for (xIndex = 0; xIndex < cellGridXdim; xIndex++) {
+                for (yIndex = 0; yIndex < cellGridYdim; yIndex++) {
+                    sumOfNeighborhood = 0;
+                    for (xIndexDelta = -1; xIndexDelta <= 1; xIndexDelta++) {
+                        for (yIndexDelta = -1; yIndexDelta <= 1; yIndexDelta++) {
                             moddedXIndex = xIndex + xIndexDelta;
                             moddedYIndex = yIndex + yIndexDelta;
-                            if (xIndexDelta == 0 && yIndexDelta == 0
-                                    || moddedXIndex == -1 || moddedXIndex == cellGridXdim
-                                    || moddedYIndex == -1 || moddedYIndex == cellGridYdim) {
-                                continue;
+                            if (moddedXIndex == -1) {
+                                moddedXIndex = cellGridXdim - 1;
+                            } else if (moddedXIndex == cellGridXdim) {
+                                moddedXIndex = 0;
                             }
-                            sumOfNeighbors += cellsGrid[moddedXIndex][moddedYIndex][0];
+                            if (moddedYIndex == -1) {
+                                moddedYIndex = cellGridYdim - 1;
+                            } else if (moddedYIndex == cellGridYdim) {
+                                moddedYIndex = 0;
+                            }
+                            sumOfNeighborhood += cellsGrid[moddedXIndex][moddedYIndex][0];
                         }
                     }
-
-                    if (cellsGrid[xIndex][yIndex][0] == 1) {
-                        if (sumOfNeighbors < 2 || sumOfNeighbors > 3) {
-                            cellsGrid[xIndex][yIndex][1] = 0;
-                        } else {
-                            cellsGrid[xIndex][yIndex][1] = 1;
-                        }
-                    } else if (sumOfNeighbors == 3) {
+                    if (sumOfNeighborhood == 3) {
                         cellsGrid[xIndex][yIndex][1] = 1;
-                    } else {
+                    } else if (sumOfNeighborhood != 4) {
                         cellsGrid[xIndex][yIndex][1] = 0;
                     }
                 }
             }
 
-            for (int xIndex = 0; xIndex < cellGridXdim; xIndex++) {
-                for (int yIndex = 0; yIndex < cellGridYdim; yIndex++) {
+            for (xIndex = 0; xIndex < cellGridXdim; xIndex++) {
+                for (yIndex = 0; yIndex < cellGridYdim; yIndex++) {
                     cellsGrid[xIndex][yIndex][0] = cellsGrid[xIndex][yIndex][1];
                 }
             }
@@ -137,40 +144,40 @@ public class CellGrid extends JComponent implements ActionListener {
         }
     }
 
-    private Point[] neighboringCoords(int xIndex, int yIndex) {
-        Point[] points;
-        int pointsArrayIndex = 0;
-        int moddedXIndex;
-        int moddedYIndex;
+    public void mouseClicked(MouseEvent event) {
+        int xCoord, yCoord;
 
-        if (xIndex == 0 || xIndex == cellGridXdim - 1) {
-            if (yIndex == 0 || yIndex == cellGridYdim - 1) {
-                points = new Point[3];
-            } else {
-                points = new Point[5];
-            }
+        //System.out.println("Mouse clicked event!");
+
+        xCoord = (int) Math.floor((double) event.getX() / 10D);
+        yCoord = (int) Math.floor((double) event.getY() / 10D);
+
+        if (cellsGrid[xCoord][yCoord][0] == 1) {
+            cellsGrid[xCoord][yCoord][0] = 0;
         } else {
-            if (yIndex == 0 || yIndex == cellGridYdim - 1) {
-                points = new Point[5];
-            } else {
-                points = new Point[8];
-            }
+            cellsGrid[xCoord][yCoord][0] = 1;
         }
+        
+        repaint();
+    }
 
-        for (int xIndexDelta = -1; xIndexDelta <= 1; xIndexDelta++) {
-            for (int yIndexDelta = -1; yIndexDelta <= 1; yIndexDelta++) {
-                moddedXIndex = xIndex + xIndexDelta;
-                moddedYIndex = yIndex + yIndexDelta;
-                if (xIndexDelta == 0 && yIndexDelta == 0
-                        || moddedXIndex == -1 || moddedXIndex == cellGridXdim
-                        || moddedYIndex == -1 || moddedYIndex == cellGridYdim) {
-                    continue;
-                }
-                points[pointsArrayIndex] = new Point(moddedXIndex, moddedYIndex);
-                pointsArrayIndex++;
-            }
-        }
+    public void mouseEntered(MouseEvent event) {
+        assert true;
+        //System.out.println("Mouse entered event!");
+    }
 
-        return points;
+    public void mouseExited(MouseEvent event) {
+        assert true;
+        //System.out.println("Mouse exited event!");
+    }
+
+    public void mousePressed(MouseEvent event) {
+        assert true;
+        //System.out.println("Mouse pressed event!");
+    }
+
+    public void mouseReleased(MouseEvent event) {
+        assert true;
+        //System.out.println("Mouse released event!");
     }
 }
