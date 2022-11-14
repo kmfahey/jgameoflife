@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"jgameoflife","l":"CellGrid"},{"p":"jgameoflife","l":"GameOfLife"}];updateSearchResults();

@@ -1,4 +1,4 @@
-package jgameoflife;
+package com.kmfahey.jgameoflife.altthreadedimpl;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.CyclicBarrier;

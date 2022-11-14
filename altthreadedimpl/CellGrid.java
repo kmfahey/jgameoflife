@@ -1,4 +1,4 @@
-package jgameoflife;
+package com.kmfahey.jgameoflife.altthreadedimpl;
 
 import javax.swing.*;
 import java.awt.*;
