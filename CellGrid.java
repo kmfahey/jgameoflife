@@ -10,13 +10,15 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.Iterator;
 
 public class CellGrid extends JComponent implements ActionListener, MouseListener {
-    final int STEP = 250;
+    final int STEP = 333;
     Color fieldColor = Color.WHITE;
     int canvasWidth;
     int canvasHeight;
-    int cellGridXdim;
-    int cellGridYdim;
-    int[][][] cellsGrid;
+    int cellGridHorizdim;
+    int cellGridVertdim;
+    int[][] displayGrid;
+    int[][] updateGrid;
+    int[][] bufferGrid;
 
     boolean automataRunning = false;
     Timer animationTimer;
@@ -24,23 +26,25 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
     public CellGrid(Dimension cellGridDims) {
         canvasWidth = (int) cellGridDims.getWidth();
         canvasHeight = (int) cellGridDims.getHeight();
-        cellGridXdim = canvasWidth / 10;
-        cellGridYdim = canvasHeight / 10;
-        cellsGrid = new int[cellGridXdim][cellGridYdim][2];
+        cellGridHorizdim = canvasWidth / 10;
+        cellGridVertdim = canvasHeight / 10;
+        displayGrid = new int[cellGridHorizdim][cellGridVertdim];
+        updateGrid = new int[cellGridHorizdim][cellGridVertdim];
+        bufferGrid = new int[cellGridHorizdim][cellGridVertdim];
 
-        for (int xIndex = 0; xIndex < cellGridXdim; xIndex++) {
-            for (int yIndex = 0; yIndex < cellGridYdim; yIndex++) {
-                cellsGrid[xIndex][yIndex][0] = 0;
+        for (int horizIndex = 0; horizIndex < cellGridHorizdim; horizIndex++) {
+            for (int vertIndex = 0; vertIndex < cellGridVertdim; vertIndex++) {
+                displayGrid[horizIndex][vertIndex] = 0;
             }
         }
 
-        System.out.println("X dimension: " + cellGridXdim + "; Y dimension: " + cellGridYdim);
+        System.out.println("X dimension: " + cellGridHorizdim + "; Y dimension: " + cellGridVertdim);
     }
 
     public void clearCellGrid() {
-        for (int xIndex = 0; xIndex < cellGridXdim; xIndex++) {
-            for (int yIndex = 0; yIndex < cellGridYdim; yIndex++) {
-                cellsGrid[xIndex][yIndex][0] = 0;
+        for (int horizIndex = 0; horizIndex < cellGridHorizdim; horizIndex++) {
+            for (int vertIndex = 0; vertIndex < cellGridVertdim; vertIndex++) {
+                displayGrid[horizIndex][vertIndex] = 0;
             }
         }
     }
@@ -49,18 +53,18 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
         graphics.setColor(fieldColor);
         graphics.fillRect(0, 0, getWidth(), getHeight());
         graphics.setColor(Color.BLACK);
-        for (int xIndex = 0; xIndex < cellGridXdim; xIndex++) {
-            for (int yIndex = 0; yIndex < cellGridYdim; yIndex++) {
-                if (cellsGrid[xIndex][yIndex][0] == 1) {
-                    graphics.fillRect(xIndex * 10, yIndex * 10, 10, 10);
+        for (int horizIndex = 0; horizIndex < cellGridHorizdim; horizIndex++) {
+            for (int vertIndex = 0; vertIndex < cellGridVertdim; vertIndex++) {
+                if (displayGrid[horizIndex][vertIndex] == 1) {
+                    graphics.fillRect(horizIndex * 10, vertIndex * 10, 10, 10);
                 }
             }
         }
         graphics.setColor(Color.WHITE);
-        for (int xIndex = 0; xIndex < cellGridXdim; xIndex++) {
-            for (int yIndex = 0; yIndex < cellGridYdim; yIndex++) {
-                if (cellsGrid[xIndex][yIndex][0] == 0) {
-                    graphics.fillRect(xIndex * 10, yIndex * 10, 10, 10);
+        for (int horizIndex = 0; horizIndex < cellGridHorizdim; horizIndex++) {
+            for (int vertIndex = 0; vertIndex < cellGridVertdim; vertIndex++) {
+                if (displayGrid[horizIndex][vertIndex] == 0) {
+                    graphics.fillRect(horizIndex * 10, vertIndex * 10, 10, 10);
                 }
             }
         }
@@ -68,11 +72,11 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
 
     public void seedCellGrid() {
         ThreadLocalRandom rng = ThreadLocalRandom.current();
-        Iterator<Integer> randomInts = rng.ints((long) cellGridXdim * (long) cellGridYdim).iterator();
-        for (int xIndex = 0; xIndex < cellGridXdim; xIndex++) {
-            for (int yIndex = 0; yIndex < cellGridYdim; yIndex++) {
+        Iterator<Integer> randomInts = rng.ints((long) cellGridHorizdim * (long) cellGridVertdim).iterator();
+        for (int horizIndex = 0; horizIndex < cellGridHorizdim; horizIndex++) {
+            for (int vertIndex = 0; vertIndex < cellGridVertdim; vertIndex++) {
                 if ((int) Math.floor((double) randomInts.next() / (double) Integer.MAX_VALUE * 8) == 0) {
-                    cellsGrid[xIndex][yIndex][0] = 1;
+                    displayGrid[horizIndex][vertIndex] = 1;
                 }
             }
         }
@@ -102,41 +106,30 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
 
     public void actionPerformed(ActionEvent event) {
         if (event.getActionCommand().equals("repaint")) {
+            int[][] deltaPairs = new int[][] { new int[] { -1, -1 }, new int[] { -1, 0 }, new int[] { -1, +1 },
+                                               new int[] { 0, -1 },                       new int[] { 0, +1 },
+                                               new int[] { +1, -1 }, new int[] { +1, 0 }, new int[] { +1, +1 } };
             int sumOfNeighborhood = 0;
-            int moddedXIndex, moddedYIndex;
-            int xIndex, yIndex;
-            int xIndexDelta, yIndexDelta;
-            for (xIndex = 0; xIndex < cellGridXdim; xIndex++) {
-                for (yIndex = 0; yIndex < cellGridYdim; yIndex++) {
+            int moddedHorizIndex, moddedVertIndex;
+            int horizIndex, vertIndex;
+            int horizIndexDelta, vertIndexDelta;
+            for (horizIndex = 0; horizIndex < cellGridHorizdim; horizIndex++) {
+                for (vertIndex = 0; vertIndex < cellGridVertdim; vertIndex++) {
                     sumOfNeighborhood = 0;
-                    for (xIndexDelta = -1; xIndexDelta <= 1; xIndexDelta++) {
-                        for (yIndexDelta = -1; yIndexDelta <= 1; yIndexDelta++) {
-                            moddedXIndex = xIndex + xIndexDelta;
-                            moddedYIndex = yIndex + yIndexDelta;
-                            if (moddedXIndex == -1) {
-                                moddedXIndex = cellGridXdim - 1;
-                            } else if (moddedXIndex == cellGridXdim) {
-                                moddedXIndex = 0;
-                            }
-                            if (moddedYIndex == -1) {
-                                moddedYIndex = cellGridYdim - 1;
-                            } else if (moddedYIndex == cellGridYdim) {
-                                moddedYIndex = 0;
-                            }
-                            sumOfNeighborhood += cellsGrid[moddedXIndex][moddedYIndex][0];
-                        }
+                    for (int[] deltaPair : deltaPairs) {
+                        moddedHorizIndex = horizIndex + deltaPair[0];
+                        moddedVertIndex = vertIndex + deltaPair[1];
+                        moddedHorizIndex = (moddedHorizIndex == -1) ? cellGridHorizdim - 1 : (moddedHorizIndex == cellGridHorizdim) ? 0 : moddedHorizIndex;
+                        moddedVertIndex = (moddedVertIndex == -1) ? cellGridVertdim - 1 : (moddedVertIndex == cellGridVertdim) ? 0 : moddedVertIndex;
+                        sumOfNeighborhood += displayGrid[moddedHorizIndex][moddedVertIndex];
                     }
-                    if (sumOfNeighborhood == 3) {
-                        cellsGrid[xIndex][yIndex][1] = 1;
-                    } else if (sumOfNeighborhood != 4) {
-                        cellsGrid[xIndex][yIndex][1] = 0;
-                    }
+                    updateGrid[horizIndex][vertIndex] = (sumOfNeighborhood == 3) ? 1 : (sumOfNeighborhood == 2) ? updateGrid[horizIndex][vertIndex] : 0;
                 }
             }
 
-            for (xIndex = 0; xIndex < cellGridXdim; xIndex++) {
-                for (yIndex = 0; yIndex < cellGridYdim; yIndex++) {
-                    cellsGrid[xIndex][yIndex][0] = cellsGrid[xIndex][yIndex][1];
+            for (horizIndex = 0; horizIndex < cellGridHorizdim; horizIndex++) {
+                for (vertIndex = 0; vertIndex < cellGridVertdim; vertIndex++) {
+                    displayGrid[horizIndex][vertIndex] = updateGrid[horizIndex][vertIndex];
                 }
             }
 
@@ -152,10 +145,10 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
         xCoord = (int) Math.floor((double) event.getX() / 10D);
         yCoord = (int) Math.floor((double) event.getY() / 10D);
 
-        if (cellsGrid[xCoord][yCoord][0] == 1) {
-            cellsGrid[xCoord][yCoord][0] = 0;
+        if (displayGrid[xCoord][yCoord] == 1) {
+            displayGrid[xCoord][yCoord] = 0;
         } else {
-            cellsGrid[xCoord][yCoord][0] = 1;
+            displayGrid[xCoord][yCoord] = 1;
         }
         
         repaint();
