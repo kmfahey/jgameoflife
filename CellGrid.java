@@ -90,8 +90,6 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
         updateGrid = new int[cellGridHorizDim][cellGridVertDim];
 
         clearCellGrid();
-
-        //System.out.println("X dimension: " + cellGridHorizDim + "; Y dimension: " + cellGridVertDim);
     }
 
     /**
@@ -337,7 +335,6 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
      */
     public void mouseEntered(final MouseEvent event) {
         assert true;
-        //System.out.println("Mouse entered event!");
     }
 
     /**
@@ -350,7 +347,6 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
      */
     public void mouseExited(final MouseEvent event) {
         assert true;
-        //System.out.println("Mouse exited event!");
     }
 
     /**
@@ -363,7 +359,6 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
      */
     public void mousePressed(final MouseEvent event) {
         assert true;
-        //System.out.println("Mouse pressed event!");
     }
 
     /**
@@ -376,6 +371,5 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
      */
     public void mouseReleased(final MouseEvent event) {
         assert true;
-        //System.out.println("Mouse released event!");
     }
 }

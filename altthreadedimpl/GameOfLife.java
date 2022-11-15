@@ -128,10 +128,6 @@ public class GameOfLife extends JFrame {
            used to define the row heights in the GridBagLayout. */
         validate();
         pack();
-
-        //Dimension newWindowDims = getSize();
-        //System.out.println(windowDims.getWidth() + " x " + windowDims.getHeight());
-        //System.out.println(newWindowDims.getWidth() + " x " + newWindowDims.getHeight());
     }
 
     /**
@@ -191,9 +187,6 @@ public class GameOfLife extends JFrame {
         int bottomInset = 0 + (int) Math.ceil((double) heightExtra / 2.0);
         int leftInset = 20 + (int) Math.floor((double) widthExtra / 2.0);
         int rightInset = 20 + (int) Math.ceil((double) widthExtra / 2.0);
-        //System.out.println(topInset + ", " + leftInset + ", " + bottomInset + ", " + rightInset);
-        /*System.out.println((cellGridRegionDims.getWidth() - leftInset - rightInset) + ", " +
-                             (cellGridRegionDims.getHeight() - topInset - bottomInset)); */
         gameConstraints = buildConstraints(row, col, rowspan, colspan);
         gameConstraints.insets = new Insets(topInset, leftInset, bottomInset, rightInset);
         return gameConstraints;
