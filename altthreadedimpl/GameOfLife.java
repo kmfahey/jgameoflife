@@ -16,7 +16,7 @@ import java.awt.event.ActionListener;
  */
 public class GameOfLife extends JFrame {
 
-    /** This variable stores the JComponent subclass CellGrid object that
+    /** This CellGrid object stores the JComponent subclass CellGrid object that
         implements the viewable area where the cellular automata runs. */
     CellGrid cellGrid;
 

@@ -26,39 +26,39 @@ import java.awt.event.MouseEvent;
  */
 public class CellGrid extends JComponent implements ActionListener, MouseListener {
 
-    /** This variable sets the horizontal dimension of the 2d cellGridSection
+    /** This double sets the horizontal dimension of the 2d cellGridSection
         array that will store subdivisions of the cell grid. */
     private final double horizSectionsDim = 4D;
 
-    /** This variable sets the vertical dimension of the 2d cellGridSection
+    /** This double sets the vertical dimension of the 2d cellGridSection
         array that will store subdivisions of the cell grid. */
     private final double vertSectionsDim = 4D;
 
-    /** This variable holds the length of time in milliseconds that the Timer
+    /** This int holds the length of time in milliseconds that the Timer
         object is instructed to wait between "repaint" events. */
     private final int stepLengthMillis = 333;
 
-    /** This variable holds the default color of the component, as used by
+    /** This Color object holds the default color of the component, as used by
         paintComponent when it renders the component. */
     private final Color fieldColor = Color.WHITE;
 
-    /** This variable is used to store the width of the component, in pixels. */
+    /** This int is used to store the width of the component, in pixels. */
     private int canvasWidth;
 
-    /** This variable is used to store the height of the component, in pixels. */
+    /** This int is used to store the height of the component, in pixels. */
     private int canvasHeight;
 
-    /** This variable is used to store the horizontal dimension of the cell
+    /** This int is used to store the horizontal dimension of the cell
         grid, in cells. */
     private int cellGridHorizDim;
 
-    /** This variable is used to store the vertical dimension of the cell grid,
+    /** This int is used to store the vertical dimension of the cell grid,
         in cells. */
     private int cellGridVertDim;
 
-    /** This 2d array is used to store the CellGridSection objects that divvy up
-        the cell grid defined in this class to handle its tasks in a distributed
-        fashion. */
+    /** This CellGridSection[][] array is used to store the CellGridSection
+        objects that divvy up the cell grid defined in this class to handle its
+        tasks in a distributed fashion. */
     private CellGridSection[][] cellGridSections;
 
     /** This variable is used to store the horizontal dimensions of each

@@ -8,12 +8,13 @@
  * failed to remedy the slowdowns in execution.
  * <p>
  * It was ripped out of the main code, since it's a needless overcomplication
- * that would obstruct further development (if any), but because it was a good
- * example of threaded divide-and-conquer of a computing task, I've preserved
- * it here for my own memory in case I need to implement a comparable solution
- * again. It makes use of monitor objects, interthread signalling via wait(),
- * notify(), notifyAll(), and passing signal values back and forth using
- * per-thread java.util.concurrent.ArrayBlockingQueue&lt;Integer&gt; objects.
+ * that would obstruct further development (if any), but because it
+ * was a successful example of threaded distributed execution of
+ * computing tasks, I've preserved it here for my own recollection in
+ * case I need to implement a comparable solution again. It makes use
+ * of monitor objects, interthread signalling via wait(), notify(),
+ * notifyAll(), and passing signal values back and forth using per-thread
+ * java.util.concurrent.ArrayBlockingQueue&lt;Integer&gt; objects.
  *
  * @since 0.9
  * @author Kerne M. Fahey

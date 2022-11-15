@@ -26,33 +26,33 @@ import java.util.Iterator;
  */
 public class CellGrid extends JComponent implements ActionListener, MouseListener {
 
-    /** This variable holds the length of time in milliseconds that the Timer
+    /** This int holds the length of time in milliseconds that the Timer
         object is instructed to wait between "repaint" events. */
     private final int STEP = 333;
 
-    /** This variable holds the default color of the component, as used by
+    /** This Color object holds the default color of the component, as used by
         paintComponent when it renders the component. */
     private final Color FIELD_COLOR = Color.WHITE;
 
-    /** This variable is used to store the width of the component, in pixels. */
+    /** This int is used to store the width of the component, in pixels. */
     private int canvasWidth;
 
-    /** This variable is used to store the height of the component, in pixels. */
+    /** This int is used to store the height of the component, in pixels. */
     private int canvasHeight;
 
-    /** This variable is used to store the horizontal dimension of the cell
+    /** This int is used to store the horizontal dimension of the cell
         grid, in cells. */
     private int cellGridHorizDim;
 
-    /** This variable is used to store the vertical dimension of the cell grid,
+    /** This int is used to store the vertical dimension of the cell grid,
         in cells. */
     private int cellGridVertDim;
 
-    /** This variable is used to store the active cellular automata grid that is
+    /** This int[][] is used to store the active cellular automata grid that is
         displayed when the component is rendered. */
     private int[][] displayGrid;
 
-    /** This variable is used to store the next generation of the cellular
+    /** This int[][] is used to store the next generation of the cellular
         automata while it's being calculated. */
     private int[][] updateGrid;
 

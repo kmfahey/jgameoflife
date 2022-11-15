@@ -20,29 +20,31 @@ import java.util.Objects;
  */
 public class CellGridDispatch {
 
-    /** This variable stores the CellGridSection objects instantiated by the
-     *  CellGrid object and passed to this object as the argument to the
-     *  constructor. */
+    /** This CellGridSection[] array stores the CellGridSection objects that
+        manage the individual portions of the composite cell grid used in this
+        game. */
     private CellGridSection[] cellGridSections;
 
-    /** This variable stores the (currently) 16 Thread objects that embody the
-     *  worker threads that this object in the main thread delegates tasks to. */
+    /** This Thread[] array stores the (currently) 16 Thread objects that embody
+        the worker threads that this object in the main thread delegates tasks
+        to. */
     private Thread[] threadArray;
 
-    /** This variable holds the monitor object that worker threads wait()
-     *  on and this object in the main thread notifyAll()s on. This thread doesn't
-     *  wait() on it and the worker threads don't notify() on it. */
+    /** This Object object holds the monitor object that worker threads wait()
+        on and this object in the main thread notifyAll()s on. This thread doesn't
+        wait() on it and the worker threads don't notify() on it. */
     private final Object mainToThreadsMonitor = new Object();
 
-    /** This variable holds the monitor object that worker threads notify()
-     *  on and this object in the main thread wait()s on. This thread doesn't
-     *  notify() on it and the worker threads don't wait() on it. */
+    /** This Object object holds the monitor object that worker threads notify()
+        on and this object in the main thread wait()s on. This thread doesn't
+        notify() on it and the worker threads don't wait() on it. */
     private final Object threadsToMainMonitor = new Object();
 
-    /** This variable stores the ArrayBlockingQueue&lt;Integer&gt; objects
-     *  used to communicate signal values to each thread. There is one for
-     *  every thread in the threadArray and every CellGridSection object in the
-     *  cellGridSections array, at the same indexes. */
+    /** This ArrayList&lt;ArrayBlockingQueue&lt;Integer&gt;&gt; stores the
+        ArrayBlockingQueue&lt;Integer&gt; objects used to communicate signal
+        values to each thread. There is one for every thread in the threadArray
+        and every CellGridSection object in the cellGridSections array, at the
+        same indexes. */
     private volatile ArrayList<ArrayBlockingQueue<Integer>> modeFlagQueues;
 
     /**

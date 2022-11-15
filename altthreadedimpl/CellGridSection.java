@@ -18,135 +18,151 @@ import java.util.concurrent.ArrayBlockingQueue;
  */
 public class CellGridSection implements Runnable {
 
-    /** This constant is used to signify the compass direction north. */
+    /** This int constant is a signal value used to signify the compass
+        direction north. */
     public static final int NORTH = 0;
 
-    /** This constant is used to signify the compass direction northeast. */
+    /** This int constant is a signal value used to signify the compass
+        direction northeast. */
     public static final int NORTHEAST = 1;
 
-    /** This constant is used to signify the compass direction east. */
+    /** This int constant is a signal value used to signify the compass
+        direction east. */
     public static final int EAST = 2;
 
-    /** This constant is used to signify the compass direction southeast. */
+    /** This int constant is a signal value used to signify the compass
+        direction southeast. */
     public static final int SOUTHEAST = 3;
 
-    /** This constant is used to signify the compass direction south. */
+    /** This int constant is a signal value used to signify the compass
+        direction south. */
     public static final int SOUTH = 4;
 
-    /** This constant is used to signify the compass direction southwest. */
+    /** This int constant is a signal value used to signify the compass
+        direction southwest. */
     public static final int SOUTHWEST = 5;
 
-    /** This constant is used to signify the compass direction west. */
+    /** This int constant is a signal value used to signify the compass
+        direction west. */
     public static final int WEST = 6;
 
-    /** This constant is used to signify the compass direction northwest. */
+    /** This int constant is a signal value used to signify the compass
+        direction northwest. */
     public static final int NORTHWEST = 7;
 
-    /** This variable is a constant holding a signal value used by this object
-     *  running in a worker thread to signal to the CellGridDispatch object
-     *  running in the main thread that it's completed the task that was
-     *  assigned to it. */
+    /** This int constant is a signal value used to signify that a distributed
+        processing task is complete. */
     public static final int FINISHED = 0;
 
-    /** This variable is a constant holding a signal value used by the
-     *  CellGridDispatch object running in the main thread to indicate that this
-     *  object running in a worker thread is to execute clearCellGrid(). */
+    /** This int constant is a signal value used to signify a distributed
+        processing task that calls clearCellGrid(). */
     public static final int MODE_CLEAR = 1;
 
-    /** This variable is a constant holding a signal value used by the
-     *  CellGridDispatch object running in the main thread to indicate that this
-     *  object running in a worker thread is to execute seedCellGrid(). */
+    /** This int constant is a signal value used to signify a distributed
+        processing task that calls seedCellGrid(). */
     public static final int MODE_SEED = 2;
 
-    /** This variable is a constant holding a signal value used by the
-     *  CellGridDispatch object running in the main thread to indicate that this
-     *  object running in a worker thread is to execute algorithmUpdateStep() . */
+    /** This int constant is a signal value used to signify a distributed
+        processing task that calls algorithmUpdateStep(). */
     public static final int MODE_UPDATE = 3;
 
-    /** This variable is a constant holding a signal value used by the
-     *  CellGridDispatch object running in the main thread to indicate that this
-     *  object running in a worker thread is to execute algorithmDisplayStep(). */
+    /** This int constant is a signal value used to signify a distributed
+        processing task that calls algorithmDisplayStep(). */
     public static final int MODE_DISPLAY = 4;
 
-    /** This variable holds the 1-capacity queue used to pass signal values
-     *  back and forth between this object running in a worker thread and the
-     *  CellGridDispatch object running in the main thread. */
+    /** This ArrayBlockingQueue&lt;Integer&gt; object holds the 1-capacity queue
+        used to pass signal values back and forth between this object running
+        in a worker thread and the CellGridDispatch object running in the main
+        thread. */
     public volatile ArrayBlockingQueue<Integer> modeFlagQueue;
 
-    /** This variable holds the CellGridSection object that neighbors this one
-     *  to the north. */
+    /** This CellGridSection object is the one that neighbors this object
+        to the north.
+        @see com.kmfahey.jgameoflife.altthreadedimpl.CellGrid */
     private CellGridSection northNeighbor;
 
-    /** This variable holds the CellGridSection object that neighbors this one
-     *  to the northeast. */
+    /** This CellGridSection object is the one that neighbors this object
+        to the northeast.
+        @see com.kmfahey.jgameoflife.altthreadedimpl.CellGrid */
     private CellGridSection northEastNeighbor;
 
-    /** This variable holds the CellGridSection object that neighbors this one
-     *  to the east. */
+    /** This CellGridSection object is the one that neighbors this object
+        to the east.
+        @see com.kmfahey.jgameoflife.altthreadedimpl.CellGrid */
     private CellGridSection eastNeighbor;
 
-    /** This variable holds the CellGridSection object that neighbors this one
-     *  to the southeast. */
+    /** This CellGridSection object is the one that neighbors this object
+        to the southeast.
+        @see com.kmfahey.jgameoflife.altthreadedimpl.CellGrid */
     private CellGridSection southEastNeighbor;
 
-    /** This variable holds the CellGridSection object that neighbors this one
-     *  to the south. */
+    /** This CellGridSection object is the one that neighbors this object
+        to the south.
+        @see com.kmfahey.jgameoflife.altthreadedimpl.CellGrid */
     private CellGridSection southNeighbor;
 
-    /** This variable holds the CellGridSection object that neighbors this one
-     *  to the southwest. */
+    /** This CellGridSection object is the one that neighbors this object
+        to the southwest.
+        @see com.kmfahey.jgameoflife.altthreadedimpl.CellGrid */
     private CellGridSection southWestNeighbor;
 
-    /** This variable holds the CellGridSection object that neighbors this one
-     *  to the west. */
+    /** This CellGridSection object is the one that neighbors this object
+        to the west.
+        @see com.kmfahey.jgameoflife.altthreadedimpl.CellGrid */
     private CellGridSection westNeighbor;
 
-    /** This variable holds the CellGridSection object that neighbors this one
-     *  to the northwest. */
+    /** This CellGridSection object is the one that neighbors this object
+        to the northwest.
+        @see com.kmfahey.jgameoflife.altthreadedimpl.CellGrid */
     private CellGridSection northWestNeighbor;
 
-    /** This variable is the monitor object by the main thread to notify() this
-     *  object, which wait()s on it. This object does not notify() with it. */
+    /** This Object is the monitor object this object running in a worker thread
+        wait()s on, and the main thread notifyAll()s on. This object does not
+        notify() on it.
+        @see com.kmfahey.jgameoflife.altthreadedimpl.CellGridDispatch */
     private Object mainToThreadsMonitor;
 
-    /** This variable is the monitor object used by this object to notify() the
-     *  main thread. It is not wait()ed on. */
+    /** This Object is the monitor object used by this object running in a
+        worker thread to notify() the main thread. This object does not wait()
+        on it.
+        @see com.kmfahey.jgameoflife.altthreadedimpl.CellGridDispatch */
     private Object threadsToMainMonitor;
 
-    /** This variable is the alternate, hidden int[][] array used to temporarily
-     *  hold the computed values of the next generation of the cellular automata
-     *  before they're copied back into the main int[][] displayCells array.  */
+    /** This int[][] array is the alternate hidden cell grid used in
+        algorithmUpdateStep() and algorithmDisplayStep() to temporarily hold the
+        computed values of the next generation of the cellular automata before
+        they're copied back into the main int[][] displayCells array. */
     private volatile int[][] updateCells;
 
-    /** This variable is the int[][] array used to store the 0 and 1 values
-     *  that represent 'dead' and 'live' cells, and is the array consulted by
-     *  CellGrid when it's rendering the cells grid to the viewable area of the
-     *  GUI.
-     * @see com.kmfahey.jgameoflife.altthreadedimpl.CellGrid */
+    /** This int[][] array is the cell grid used to store the 0 and 1 values
+        that represent 'dead' and 'live' cells, and is the array consulted by
+        CellGrid when it's rendering the cells grid to the viewable area of the
+        GUI.
+        @see com.kmfahey.jgameoflife.altthreadedimpl.CellGrid */
     private volatile int[][] displayCells;
 
-    /** This variable is the number of cells in the vertical dimension of the
-     *  displayCells array. */
+    /** This int is the number of cells in the vertical dimension of the
+        displayCells array. */
     private int horizDim;
 
-    /** This variable is the number of cells in the vertical dimension of the
-     *  displayCells array. */
+    /** This int is the number of cells in the vertical dimension of the
+        displayCells array. */
     private int vertDim;
 
-    /** This variable is the maximum value of the horizontal dimension of the
-     *  displayCells array. */
+    /** This int is the maximum value of the horizontal dimension of the
+        displayCells array. */
     private int maxHoriz;
 
-    /** This variable is the maximum value of the vertical dimension of the
-     *  displayCells array. */
+    /** This int is the maximum value of the vertical dimension of the
+        displayCells array. */
     private int maxVert;
 
-    /** This variable is the horizontal coordinate of the upper left corner of
-     *  this object's cells grid in the composite cells grid it is a part of. */
+    /** This int is the horizontal coordinate of the upper left corner of
+        this object's cells grid in the composite cells grid it is a part of. */
     private int originHorizCoord;
 
-    /** This variable is the vertical coordinate of the upper left corner of
-     *  this object's cells grid in the composite cells grid it is a part of. */
+    /** This int is the vertical coordinate of the upper left corner of
+        this object's cells grid in the composite cells grid it is a part of. */
     private int originVertCoord;
 
     /**
