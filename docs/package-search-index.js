@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"jgameoflife"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.kmfahey.jgameoflife"},{"l":"com.kmfahey.jgameoflife.altthreadedimpl"}];updateSearchResults();

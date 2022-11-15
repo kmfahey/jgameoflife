@@ -349,14 +349,14 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
 
                 /* These values are stored so they can be used without a full
                    call path. */
-                int originHorizCoord = cellGridSections[outerHorizIndex][outerVertIndex].originHorizCoord;
-                int originVertCoord = cellGridSections[outerHorizIndex][outerVertIndex].originVertCoord;
+                int originHorizCoord = cellGridSections[outerHorizIndex][outerVertIndex].getOriginHorizCoord();
+                int originVertCoord = cellGridSections[outerHorizIndex][outerVertIndex].getOriginVertCoord();
 
                 for (int innerHorizIndex = 0;
-                     innerHorizIndex < cellGridSections[outerHorizIndex][outerVertIndex].horizDim;
+                     innerHorizIndex < cellGridSections[outerHorizIndex][outerVertIndex].getHorizDim();
                      innerHorizIndex++) {
                     for (int innerVertIndex = 0;
-                         innerVertIndex < cellGridSections[outerHorizIndex][outerVertIndex].vertDim;
+                         innerVertIndex < cellGridSections[outerHorizIndex][outerVertIndex].getVertDim();
                          innerVertIndex++) {
                         if (cellGridSections[outerHorizIndex][outerVertIndex]
                                 .getDisplayCells()[innerHorizIndex][innerVertIndex] == 1) {
@@ -490,7 +490,7 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
            values from each CellGridSection in order, followed by
            cellGridHorizDim + 1 to mark the edge of the cell grid. */
         for (horizIndex = 0; horizIndex < cellGridSections.length; horizIndex++) {
-            sectionHorizOrdinateBounds[horizIndex] = cellGridSections[horizIndex][vertIndex].originHorizCoord;
+            sectionHorizOrdinateBounds[horizIndex] = cellGridSections[horizIndex][vertIndex].getOriginHorizCoord();
         }
         sectionHorizOrdinateBounds[horizIndex] = cellGridHorizDim;
 
@@ -498,7 +498,7 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
            values from each CellGridSection in order, followed by
            cellGridVertDim + 1 to mark the edge of the cell grid. */
         for (vertIndex = 0; vertIndex < cellGridSections[0].length; vertIndex++) {
-            sectionVertOrdinateBounds[vertIndex] = cellGridSections[0][vertIndex].originVertCoord;
+            sectionVertOrdinateBounds[vertIndex] = cellGridSections[0][vertIndex].getOriginVertCoord();
         }
         sectionVertOrdinateBounds[vertIndex] = cellGridVertDim;
 

@@ -19,59 +19,59 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class CellGridSection implements Runnable {
 
     /** This constant is used to signify the compass direction north. */
-    private static final int NORTH = 0;
+    public static final int NORTH = 0;
 
     /** This constant is used to signify the compass direction northeast. */
-    private static final int NORTHEAST = 1;
+    public static final int NORTHEAST = 1;
 
     /** This constant is used to signify the compass direction east. */
-    private static final int EAST = 2;
+    public static final int EAST = 2;
 
     /** This constant is used to signify the compass direction southeast. */
-    private static final int SOUTHEAST = 3;
+    public static final int SOUTHEAST = 3;
 
     /** This constant is used to signify the compass direction south. */
-    private static final int SOUTH = 4;
+    public static final int SOUTH = 4;
 
     /** This constant is used to signify the compass direction southwest. */
-    private static final int SOUTHWEST = 5;
+    public static final int SOUTHWEST = 5;
 
     /** This constant is used to signify the compass direction west. */
-    private static final int WEST = 6;
+    public static final int WEST = 6;
 
     /** This constant is used to signify the compass direction northwest. */
-    private static final int NORTHWEST = 7;
+    public static final int NORTHWEST = 7;
 
     /** This variable is a constant holding a signal value used by this object
      *  running in a worker thread to signal to the CellGridDispatch object
      *  running in the main thread that it's completed the task that was
      *  assigned to it. */
-    private static final int FINISHED = 0;
+    public static final int FINISHED = 0;
 
     /** This variable is a constant holding a signal value used by the
      *  CellGridDispatch object running in the main thread to indicate that this
      *  object running in a worker thread is to execute clearCellGrid(). */
-    private static final int MODE_CLEAR = 1;
+    public static final int MODE_CLEAR = 1;
 
     /** This variable is a constant holding a signal value used by the
      *  CellGridDispatch object running in the main thread to indicate that this
      *  object running in a worker thread is to execute seedCellGrid(). */
-    private static final int MODE_SEED = 2;
+    public static final int MODE_SEED = 2;
 
     /** This variable is a constant holding a signal value used by the
      *  CellGridDispatch object running in the main thread to indicate that this
      *  object running in a worker thread is to execute algorithmUpdateStep() . */
-    private static final int MODE_UPDATE = 3;
+    public static final int MODE_UPDATE = 3;
 
     /** This variable is a constant holding a signal value used by the
      *  CellGridDispatch object running in the main thread to indicate that this
      *  object running in a worker thread is to execute algorithmDisplayStep(). */
-    private static final int MODE_DISPLAY = 4;
+    public static final int MODE_DISPLAY = 4;
 
     /** This variable holds the 1-capacity queue used to pass signal values
      *  back and forth between this object running in a worker thread and the
      *  CellGridDispatch object running in the main thread. */
-    private volatile ArrayBlockingQueue<Integer> modeFlagQueue;
+    public volatile ArrayBlockingQueue<Integer> modeFlagQueue;
 
     /** This variable holds the CellGridSection object that neighbors this one
      *  to the north. */
@@ -296,11 +296,6 @@ public class CellGridSection implements Runnable {
                             case MODE_DISPLAY:
                                 algorithmDisplayStep();
                                 break;
-                            default:
-                                throw new Exception(
-                                    "Invalid switch statement execution: "
-                                    + "unrecognized int mode flag value "
-                                    + runMode + " placed in queue.")
                         }
                     }
                 }
@@ -369,7 +364,47 @@ public class CellGridSection implements Runnable {
     }
 
     /**
-     * This method is an accessor for the private maxHoriz value.
+     * This method is an accessor for the private horizDim variable.
+     *
+     * @return The int maxHoriz, the maximum value of the horizontal dimension
+     *         of the displayCells array.
+     */
+    public int getHorizDim() {
+        return horizDim;
+    }
+
+    /**
+     * This method is an accessor for the private originHorizCoord variable.
+     *
+     * @return The int maxHoriz, the maximum value of the horizontal dimension
+     *         of the displayCells array.
+     */
+    public int getOriginHorizCoord() {
+        return originHorizCoord;
+    }
+
+    /**
+     * This method is an accessor for the private originVertCoord variable.
+     *
+     * @return The int maxHoriz, the maximum value of the horizontal dimension
+     *         of the displayCells array.
+     */
+    public int getOriginVertCoord() {
+        return originVertCoord;
+    }
+
+    /**
+     * This method is an accessor for the private vertDim variable.
+     *
+     * @return The int maxHoriz, the maximum value of the horizontal dimension
+     *         of the displayCells array.
+     */
+    public int getVertDim() {
+        return vertDim;
+    }
+
+    /**
+     * This method is an accessor for the private maxHoriz variable.
      *
      * @return The int maxHoriz, the maximum value of the horizontal dimension
      *         of the displayCells array.
@@ -379,7 +414,7 @@ public class CellGridSection implements Runnable {
     }
 
     /**
-     * This method is an accessor for the private maxVert value.
+     * This method is an accessor for the private maxVert variable.
      *
      * @return The int maxVert, the maximum value of the vertical dimension of
      *         the displayCells array.
@@ -389,7 +424,7 @@ public class CellGridSection implements Runnable {
     }
 
     /**
-     * This method is an accessor for the private displayCells value.
+     * This method is an accessor for the private displayCells variable.
      *
      * @return The int[][] displayCells comprising the region of the composite
      *         cells grid that this object maintains.
