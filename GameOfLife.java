@@ -1,9 +1,15 @@
 package com.kmfahey.jgameoflife;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Toolkit;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 /**
  * This class implements the GUI frontend that provides an interface to this
@@ -45,7 +51,7 @@ public class GameOfLife extends JFrame {
            and titlebar), and the actual usable window area is smaller. If
            this isn't corrected for, the end-state window will have elements
            oversized for the area.
-          
+
            I didn't find a straightforward way to get the window decoration
            sizes before the window is made visible. Instead, a call to
            JFrame.pack() at the end of the constructor is used to resize the
@@ -83,7 +89,7 @@ public class GameOfLife extends JFrame {
         gameLayout.rowHeights = new int[] { (int) cellGridRegionDims.getHeight(),
                                             (int) buttonRegionDims.getHeight() };
 
-        
+
         /* This code defines the GridBagConstraints for the cell grid, then
            extracts the insets that buildCellGridConstraints defined, uses
            them to calculate the width &amp; height of the actual cell grid,
@@ -133,7 +139,7 @@ public class GameOfLife extends JFrame {
      * buildButtonConstraints to build the basic GridBagConstraints object
      * that those two methods expand upon. It passes all its arguments to the
      * GridBagConstraints constructor.
-     * 
+     *
      * @param row     The row argument to GridBagConstraints.
      * @param col     The col argument to GridBagConstraints.
      * @param rowspan The rowspan argument to GridBagConstraints.
@@ -160,14 +166,14 @@ public class GameOfLife extends JFrame {
      * automata area of the GUI. It sets the grid-bag location, and devises
      * appropriate insets based on the specified button region dimensions.
      *
-     * @param row              The row argument to GridBagConstraints.
-     * @param col              The col argument to GridBagConstraints.
-     * @param rowspan          The rowspan argument to GridBagConstraints.
-     * @param colspan          The colspan argument to GridBagConstraints.
-     * @param buttonRegionDims A Dimensions object that specifies the width and
-     *                         height, in pixels, of the region of the
-     *                         GridBagLayout where the button will appear.
-     * @return                 A GridBagConstraints object constructed to order.
+     * @param row                The row argument to GridBagConstraints.
+     * @param col                The col argument to GridBagConstraints.
+     * @param rowspan            The rowspan argument to GridBagConstraints.
+     * @param colspan            The colspan argument to GridBagConstraints.
+     * @param cellGridRegionDims A Dimensions object that specifies the width
+     *                           and height, in pixels, of the region of the
+     *                           GridBagLayout where the button will appear.
+     * @return                   A GridBagConstraints object constructed to order.
      * @see java.awt.GridBagConstraints
      * @see java.awt.GridBagLayout
      * @see java.awt.Insets
@@ -176,11 +182,9 @@ public class GameOfLife extends JFrame {
     private GridBagConstraints buildCellGridConstraints(final int row, final int col,
                                                         final int rowspan, final int colspan,
                                                         final Dimension cellGridRegionDims) {
-        final double CELL_WIDTH = 10D;
-        final double CELL_HEIGHT = 10D;
         GridBagConstraints gameConstraints;
-        int widthExtra = (int) (cellGridRegionDims.getWidth() % CELL_WIDTH);
-        int heightExtra = (int) (cellGridRegionDims.getHeight() % CELL_HEIGHT);
+        int widthExtra = (int) (cellGridRegionDims.getWidth() % 10D);
+        int heightExtra = (int) (cellGridRegionDims.getHeight() % 10D);
         int topInset = 20 + (int) Math.floor((double) heightExtra / 2.0);
         int bottomInset = 0 + (int) Math.ceil((double) heightExtra / 2.0);
         int leftInset = 20 + (int) Math.floor((double) widthExtra / 2.0);
@@ -216,14 +220,14 @@ public class GameOfLife extends JFrame {
                                                       final int rowspan, final int colspan,
                                                       final Dimension buttonRegionDims) {
         GridBagConstraints gameConstraints;
-        int widthFifth = (int) Math.floor((double) buttonRegionDims.getWidth() / 5.0D);
-        int heightFifth = (int) Math.floor((double) buttonRegionDims.getHeight() / 5.0D);
+        int widthFifth = (int) Math.floor((double) buttonRegionDims.getWidth() * 0.2D);
+        int heightFifth = (int) Math.floor((double) buttonRegionDims.getHeight() * 0.2D);
         gameConstraints = buildConstraints(row, col, rowspan, colspan);
         gameConstraints.insets = new Insets(heightFifth, widthFifth, heightFifth, widthFifth);
         return gameConstraints;
     }
 
-    /** 
+    /**
      * This method is used to construct a JButton with an actionListener that
      * starts or stops the automata when clicked. The button begins as a "Start"
      * button, with that text, and when clicked it starts the automata. After
@@ -251,7 +255,7 @@ public class GameOfLife extends JFrame {
         return button;
     }
 
-    /** 
+    /**
      * This method is used to construct a JButton with an actionListener that
      * populates the CellGrid with random live cells when clicked.
      *
@@ -282,7 +286,7 @@ public class GameOfLife extends JFrame {
         JButton button = new JButton("Clear");
         button.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(final ActionEvent event) {
                 if (startButton.getText() == "Stop") {
                     startButton.doClick();
                 }
@@ -302,7 +306,7 @@ public class GameOfLife extends JFrame {
      * @param args The argument string array composed from the commandline
      *             arguments, if any.
      */
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         GameOfLife game = new GameOfLife();
         game.setVisible(true);
         game.setLocationRelativeTo(null);

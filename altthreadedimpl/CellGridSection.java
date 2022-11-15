@@ -1,9 +1,9 @@
 package com.kmfahey.jgameoflife.altthreadedimpl;
 
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.CyclicBarrier;
-import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.Iterator;
 
 /**
  * This class implements a portion of the composite cell grid maintained by

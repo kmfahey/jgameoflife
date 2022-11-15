@@ -1,14 +1,16 @@
 package com.kmfahey.jgameoflife;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.Graphics;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.NoSuchElementException;
 import java.util.Iterator;
+import javax.swing.JComponent;
+import javax.swing.Timer;
 
 /**
  * This class implements the cells grid of Conway's Game of Life as a subclass
@@ -26,13 +28,21 @@ import java.util.Iterator;
  */
 public class CellGrid extends JComponent implements ActionListener, MouseListener {
 
-    /** This int holds the length of time in milliseconds that the Timer
-        object is instructed to wait between "repaint" events. */
-    private final int STEP = 333;
+    /** This constant int holds the length of time in milliseconds that the
+        Timer object is instructed to wait between "repaint" events. */
+    private final int stepLengthMillis = 333;
 
-    /** This Color object holds the default color of the component, as used by
-        paintComponent when it renders the component. */
-    private final Color FIELD_COLOR = Color.WHITE;
+    /** This constant Color object holds the default color of the component, as
+        used by paintComponent when it renders the component. */
+    private final Color fieldColor = Color.WHITE;
+
+    /** This constant int holds the default height in pixels of a single
+        cell. */
+    private final int cellWidth = 10;
+
+    /** This constant int holds the default width in pixels of a single
+        cell. */
+    private final int cellHeight = 10;
 
     /** This int is used to store the width of the component, in pixels. */
     private int canvasWidth;
@@ -72,13 +82,10 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
      *                     these values.
      */
     public CellGrid(final Dimension cellGridDims) {
-        final int CELL_WIDTH = 10;
-        final int CELL_HEIGHT = 10;
-
         canvasWidth = (int) cellGridDims.getWidth();
         canvasHeight = (int) cellGridDims.getHeight();
-        cellGridHorizDim = canvasWidth / CELL_WIDTH;
-        cellGridVertDim = canvasHeight / CELL_HEIGHT;
+        cellGridHorizDim = canvasWidth / cellWidth;
+        cellGridVertDim = canvasHeight / cellHeight;
         displayGrid = new int[cellGridHorizDim][cellGridVertDim];
         updateGrid = new int[cellGridHorizDim][cellGridVertDim];
 
@@ -112,10 +119,7 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
      * @see java.awt.Graphics
      */
     protected void paintComponent(final Graphics graphics) {
-        final int CELL_WIDTH = 10;
-        final int CELL_HEIGHT = 10;
-
-        graphics.setColor(FIELD_COLOR);
+        graphics.setColor(fieldColor);
         graphics.fillRect(0, 0, getWidth(), getHeight());
         graphics.setColor(Color.BLACK);
         /* These nested for loops iterate over the displayGrid 2d array and use
@@ -124,7 +128,7 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
         for (int horizIndex = 0; horizIndex < cellGridHorizDim; horizIndex++) {
             for (int vertIndex = 0; vertIndex < cellGridVertDim; vertIndex++) {
                 if (displayGrid[horizIndex][vertIndex] == 1) {
-                    graphics.fillRect(horizIndex * CELL_WIDTH, vertIndex * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT);
+                    graphics.fillRect(horizIndex * cellWidth, vertIndex * cellHeight, cellWidth, cellHeight);
                 }
             }
         }
@@ -144,7 +148,7 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
         for (int horizIndex = 0; horizIndex < cellGridHorizDim; horizIndex++) {
             for (int vertIndex = 0; vertIndex < cellGridVertDim; vertIndex++) {
                 if (displayGrid[horizIndex][vertIndex] == 0) {
-                    graphics.fillRect(horizIndex * CELL_WIDTH, vertIndex * CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT);
+                    graphics.fillRect(horizIndex * cellWidth, vertIndex * cellHeight, cellWidth, cellHeight);
                 }
             }
         }
@@ -186,7 +190,7 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
      * animation. It's called by the Start button in the GameOfLife class. It
      * either instantiated a Timer object and starts it, or if one already
      * exists it restarts it. The Timer object sends a "repaint" event to
-     * actionPerformed() every STEP milliseconds (optimistically).
+     * actionPerformed() every stepLengthMillis milliseconds (optimistically).
      *
      */
     public void startCellularAutomata() {
@@ -195,7 +199,7 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
             automataRunning = true;
         }
         if (animationTimer == null) {
-            animationTimer = new Timer(STEP, this);
+            animationTimer = new Timer(stepLengthMillis, this);
             animationTimer.setActionCommand("repaint");
             animationTimer.setRepeats(true);
             animationTimer.start();
@@ -219,8 +223,8 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
 
     /**
      * This method is called by the Timer object set by startCellularAutomata()
-     * above, every STEP milliseconds (optimistically). A single step of the
-     * Conway's Game of Life algorithm is executed here.
+     * above, every stepLengthMillis milliseconds (optimistically). A single
+     * step of the Conway's Game of Life algorithm is executed here.
      *
      * @param event The event sent to this method by the Timer object that this
      *              class uses to regularly prompt steps of the algorithm so the
@@ -303,16 +307,14 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
      * @see java.awt.event.MouseListener
      */
     public void mouseClicked(final MouseEvent event) {
-        final double CELL_WIDTH = 10D;
-        final double CELL_HEIGHT = 10D;
         int horizCoord;
         int vertCoord;
 
         /* The cells are 10 pixels on a side, so the X and Y values on the
            MouseEvent object are interpreted to coordinates in the cell grid by
            dividing them by 10 and rounding down. */
-        horizCoord = (int) Math.floor((double) event.getX() / CELL_WIDTH);
-        vertCoord = (int) Math.floor((double) event.getY() / CELL_HEIGHT);
+        horizCoord = (int) Math.floor((double) event.getX() / (double) cellWidth);
+        vertCoord = (int) Math.floor((double) event.getY() / (double) cellHeight);
 
         /* The cell at those coordinates is inverted from 1 to 0, or 0 to 1. */
         if (displayGrid[horizCoord][vertCoord] == 1) {

@@ -1,14 +1,14 @@
 package com.kmfahey.jgameoflife.altthreadedimpl;
 
-import javax.swing.JComponent;
-import javax.swing.Timer;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.Graphics;
+import javax.swing.JComponent;
+import javax.swing.Timer;
 
 /**
  * This class is a JComponent subclass that implements the viewable area in
