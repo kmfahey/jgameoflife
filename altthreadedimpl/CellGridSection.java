@@ -3,98 +3,236 @@ package com.kmfahey.jgameoflife.altthreadedimpl;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.CyclicBarrier;
 import java.util.Iterator;
-import java.time.ZonedDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * This class implements a portion of the composite cell grid maintained by
+ * the CellGrid object. It stores instance variables that enable it to report
+ * where in the composite cell grid its region is located, and it stores all
+ * eight of its neighboring CellGridSection objects so that it can complete
+ * calculations of the sum of neighboring cells for cells located on the edge or
+ * in the corner of the region of the cells grid that it maintains.
+ *
+ * @see com.kmfahey.jgameoflife.altthreadedimpl.CellGrid
+ * @see com.kmfahey.jgameoflife.altthreadedimpl.CellGridDispatch
+ */
 public class CellGridSection implements Runnable {
-    public static final int NORTH = 0;
-    public static final int NORTHEAST = 1;
-    public static final int EAST = 2;
-    public static final int SOUTHEAST = 3;
-    public static final int SOUTH = 4;
-    public static final int SOUTHWEST = 5;
-    public static final int WEST = 6;
-    public static final int NORTHWEST = 7;
 
-    public static final int FINISHED = 0;
-    public static final int MODE_CLEAR = 1;
-    public static final int MODE_SEED = 2;
-    public static final int MODE_UPDATE = 3;
-    public static final int MODE_DISPLAY = 4;
+    /** This constant is used to signify the compass direction north. */
+    private static final int NORTH = 0;
 
-    public int horizDim;
-    public int vertDim;
-    public int maxHoriz;
-    public int maxVert;
-    public int originHoriz;
-    public int originVert;
-    public volatile int[][] displayCells;
-    private int[][] updateCells;
-    private int[][] bufferCells;
-    CellGridSection northNeighbor;
-    CellGridSection northEastNeighbor;
-    CellGridSection eastNeighbor;
-    CellGridSection southWestNeighbor;
-    CellGridSection southNeighbor;
-    CellGridSection southEastNeighbor;
-    CellGridSection westNeighbor;
-    CellGridSection northWestNeighbor;
+    /** This constant is used to signify the compass direction northeast. */
+    private static final int NORTHEAST = 1;
 
-    private CellGridDispatch cellGridDispatch;
-    public int originHorizCoord;
-    public int originVertCoord;
-    private String threadName;
-    private Thread mainThread;
-    private Object mainToThreadsMonitor;
-    private Object threadsToMainMonitor;
+    /** This constant is used to signify the compass direction east. */
+    private static final int EAST = 2;
+
+    /** This constant is used to signify the compass direction southeast. */
+    private static final int SOUTHEAST = 3;
+
+    /** This constant is used to signify the compass direction south. */
+    private static final int SOUTH = 4;
+
+    /** This constant is used to signify the compass direction southwest. */
+    private static final int SOUTHWEST = 5;
+
+    /** This constant is used to signify the compass direction west. */
+    private static final int WEST = 6;
+
+    /** This constant is used to signify the compass direction northwest. */
+    private static final int NORTHWEST = 7;
+
+    /** This variable is a constant holding a signal value used by this object
+     *  running in a worker thread to signal to the CellGridDispatch object
+     *  running in the main thread that it's completed the task that was
+     *  assigned to it. */
+    private static final int FINISHED = 0;
+
+    /** This variable is a constant holding a signal value used by the
+     *  CellGridDispatch object running in the main thread to indicate that this
+     *  object running in a worker thread is to execute clearCellGrid(). */
+    private static final int MODE_CLEAR = 1;
+
+    /** This variable is a constant holding a signal value used by the
+     *  CellGridDispatch object running in the main thread to indicate that this
+     *  object running in a worker thread is to execute seedCellGrid(). */
+    private static final int MODE_SEED = 2;
+
+    /** This variable is a constant holding a signal value used by the
+     *  CellGridDispatch object running in the main thread to indicate that this
+     *  object running in a worker thread is to execute algorithmUpdateStep() . */
+    private static final int MODE_UPDATE = 3;
+
+    /** This variable is a constant holding a signal value used by the
+     *  CellGridDispatch object running in the main thread to indicate that this
+     *  object running in a worker thread is to execute algorithmDisplayStep(). */
+    private static final int MODE_DISPLAY = 4;
+
+    /** This variable holds the 1-capacity queue used to pass signal values
+     *  back and forth between this object running in a worker thread and the
+     *  CellGridDispatch object running in the main thread. */
     private volatile ArrayBlockingQueue<Integer> modeFlagQueue;
-    private volatile ReentrantLock suspendLock;
-    private int algorithmStepCounter = 0;
 
-    public CellGridSection(int cellsWidth, int cellsHeight, int originHorizCoordVal, int originVertCoordVal) {
+    /** This variable holds the CellGridSection object that neighbors this one
+     *  to the north. */
+    private CellGridSection northNeighbor;
+
+    /** This variable holds the CellGridSection object that neighbors this one
+     *  to the northeast. */
+    private CellGridSection northEastNeighbor;
+
+    /** This variable holds the CellGridSection object that neighbors this one
+     *  to the east. */
+    private CellGridSection eastNeighbor;
+
+    /** This variable holds the CellGridSection object that neighbors this one
+     *  to the southeast. */
+    private CellGridSection southEastNeighbor;
+
+    /** This variable holds the CellGridSection object that neighbors this one
+     *  to the south. */
+    private CellGridSection southNeighbor;
+
+    /** This variable holds the CellGridSection object that neighbors this one
+     *  to the southwest. */
+    private CellGridSection southWestNeighbor;
+
+    /** This variable holds the CellGridSection object that neighbors this one
+     *  to the west. */
+    private CellGridSection westNeighbor;
+
+    /** This variable holds the CellGridSection object that neighbors this one
+     *  to the northwest. */
+    private CellGridSection northWestNeighbor;
+
+    /** This variable is the monitor object by the main thread to notify() this
+     *  object, which wait()s on it. This object does not notify() with it. */
+    private Object mainToThreadsMonitor;
+
+    /** This variable is the monitor object used by this object to notify() the
+     *  main thread. It is not wait()ed on. */
+    private Object threadsToMainMonitor;
+
+    /** This variable is the alternate, hidden int[][] array used to temporarily
+     *  hold the computed values of the next generation of the cellular automata
+     *  before they're copied back into the main int[][] displayCells array.  */
+    private volatile int[][] updateCells;
+
+    /** This variable is the int[][] array used to store the 0 and 1 values
+     *  that represent 'dead' and 'live' cells, and is the array consulted by
+     *  CellGrid when it's rendering the cells grid to the viewable area of the
+     *  GUI.
+     * @see com.kmfahey.jgameoflife.altthreadedimpl.CellGrid */
+    private volatile int[][] displayCells;
+
+    /** This variable is the number of cells in the vertical dimension of the
+     *  displayCells array. */
+    private int horizDim;
+
+    /** This variable is the number of cells in the vertical dimension of the
+     *  displayCells array. */
+    private int vertDim;
+
+    /** This variable is the maximum value of the horizontal dimension of the
+     *  displayCells array. */
+    private int maxHoriz;
+
+    /** This variable is the maximum value of the vertical dimension of the
+     *  displayCells array. */
+    private int maxVert;
+
+    /** This variable is the horizontal coordinate of the upper left corner of
+     *  this object's cells grid in the composite cells grid it is a part of. */
+    private int originHorizCoord;
+
+    /** This variable is the vertical coordinate of the upper left corner of
+     *  this object's cells grid in the composite cells grid it is a part of. */
+    private int originVertCoord;
+
+    /**
+     * This method initializes the CellGridSection object, setting instance
+     * variables.
+     *
+     * @param cellsWidth          The width of the portion of the cells grid
+     *                            that's been delegated to this object, in
+     *                            cells.
+     * @param cellsHeight         The height of the portion of the cells grid
+     *                            that's been delegated to this object, in
+     *                            cells.
+     * @param originHorizCoordVal The horizontal coordinate of the upper left
+     *                            corner of this object's cells grid in the
+     *                            composite cells grid it is a part of.
+     * @param originVertCoordVal  The vertical coordinate of the upper left
+     *                            corner of this object's cells grid in the
+     *                            composite cells grid it is a part of.
+     * @see com.kmfahey.jgameoflife.altthreadedimpl.CellGrid
+     */
+    public CellGridSection(final int cellsWidth, final int cellsHeight,
+                           final int originHorizCoordVal, final int originVertCoordVal) {
         horizDim = cellsWidth;
         vertDim = cellsHeight;
         maxHoriz = horizDim - 1;
         maxVert = vertDim - 1;
         originHorizCoord = originHorizCoordVal;
         originVertCoord = originVertCoordVal;
-        bufferCells = new int[horizDim][vertDim]
         displayCells = new int[horizDim][vertDim];
         updateCells = new int[horizDim][vertDim];
-        for (int horizIndex = 0; horizIndex < horizDim; horizIndex++) {
-            for (int vertIndex = 0; vertIndex < vertDim; vertIndex++) {
-                displayCells[horizIndex][vertIndex] = 0;
-            }
-        }
     }
 
-    public void setModeFlagQueue(ArrayBlockingQueue<Integer> modeFlagQueueVar) {
+    /**
+     * This method is used by CellGridDispatch to set the modeFlagQueue instance
+     * variable. This 1-capacity queue is used by CellGridDispatch to convey one
+     * of the constants MODE_CLEAR, MODE_SEED, MODE_UPDATE, or MODE_DISPLAY.
+     * The run() method removes that value from the queue to signal the work
+     * has begun, and replaces it with the constant FINISHED when the task is
+     * complete. The CellGridDispatch object in the main thread removes that
+     * value while it is wrapping up the execution of the task,
+     *
+     * @param modeFlagQueueVar The 1-capacity queue used to communicate mode
+     *                         flags back and forth between this object's run()
+     *                         method in a worker thread and CellGridDispatch
+     *                         running in the main thread.
+     * @see com.kmfahey.jgameoflife.altthreadedimpl.CellGridDispatch
+     */
+    public void setModeFlagQueue(final ArrayBlockingQueue<Integer> modeFlagQueueVar) {
         modeFlagQueue = modeFlagQueueVar;
     }
 
-    public void setThreadName(String threadNameStr) {
-        threadName = threadNameStr;
-    }
-
-    public void setMonitors(Object mainToThreadsMonitorObj, Object threadsToMainMonitorObj) {
+    /**
+     * This method is used to set the two monitor objects that are used to
+     * signal and be signalled by the CellGridDispatch object running in the
+     * main thread.
+     *
+     * @param mainToThreadsMonitorObj The monitor object that CellGridDispatch
+     *                                in the main thread calls notifyAll() on
+     *                                and this object in a worker thread calls
+     *                                wait() on.
+     * @param threadsToMainMonitorObj The monitor object that CellGridDispatch
+     *                                in the main thread calls wait() on and
+     *                                this object in a worker thread calls
+     *                                notify() on.
+     * @see com.kmfahey.jgameoflife.altthreadedimpl.CellGridDispatch
+     */
+    public void setMonitors(final Object mainToThreadsMonitorObj, final Object threadsToMainMonitorObj) {
         mainToThreadsMonitor = mainToThreadsMonitorObj;
         threadsToMainMonitor = threadsToMainMonitorObj;
     }
 
-    public void setDispatch(CellGridDispatch dispatchObj) {
-        cellGridDispatch = dispatchObj;
-    }
-
-    public void setLock(ReentrantLock suspendLockVal) {
-        suspendLock = suspendLockVal;
-    }
-
-    public void setNeighbor(CellGridSection neighborGrid, int direction) {
-        switch (direction) {
+    /**
+     * This method is used to set one of the 8 {compassDirection}Neighbor
+     * instance variables to another CellGridSection object. When used for
+     * all 8 compass directions, this enables this CellGridSection object to
+     * keep track of its neighbors so it can complete the cellular automata"s
+     * neighbors calculation when the center cell lies on an edge or in a corner
+     * of this object's portion of the composite cells grid.
+     *
+     * @param neighborGrid The neighboring CellGridSection object.
+     * @param dirFlag      One of the constants NORTH, NORTHEAST, EAST,
+     *                     SOUTHEAST, SOUTH, SOUTHWEST, WEST, or NORTHWEST.
+     * @see com.kmfahey.jgameoflife.altthreadedimpl.CellGridDispatch
+     */
+    public void setNeighbor(final CellGridSection neighborGrid, final int dirFlag) {
+        switch (dirFlag) {
             case NORTH:
                 northNeighbor = neighborGrid;
                 break;
@@ -122,11 +260,19 @@ public class CellGridSection implements Runnable {
         }
     }
 
+    /**
+     * This method implements the run() method called for by the Runnable
+     * interface, and is the method that's called by the Thread object that's
+     * instantiated around this CellGridSection object by CellGridDispatch. In
+     * order to keep the thread persistent during the indefinite period of the
+     * automata, it contains an infinite loop and never returns. During the
+     * execution, it uses a pair of monitor objects to start and stop execution,
+     * and passes signal int values back and forth with the main thread run from
+     * CellGridDispatch using an ArrayBlockingQueue&lt;Integer&gt;.
+     */
     public void run() {
-//        CellGrid.statusLineWIsoTime(threadName, "running");
         while (true) {
             int runMode = -1;
-//            CellGrid.statusLineWIsoTime(threadName, "repeating while loop");
             if (modeFlagQueue.size() > 0) {
                 synchronized (modeFlagQueue) {
                     while (modeFlagQueue.size() > 0) {
@@ -134,31 +280,30 @@ public class CellGridSection implements Runnable {
                             try {
                                 runMode = modeFlagQueue.take();
                             } catch (InterruptedException exception) {
-//                                CellGrid.statusLineWIsoTime(threadName, exception.getMessage());
                                 continue;
                             }
                         }
                         switch (runMode) {
                             case MODE_CLEAR:
-//                                CellGrid.statusLineWIsoTime(threadName, "got MODE_CLEAR");
                                 clearCellGrid();
                                 break;
                             case MODE_SEED:
-//                                CellGrid.statusLineWIsoTime(threadName, "got MODE_SEED");
                                 seedCellGrid();
                                 break;
                             case MODE_UPDATE:
-//                                CellGrid.statusLineWIsoTime(threadName, "got MODE_UPDATE");
                                 algorithmUpdateStep();
                                 break;
                             case MODE_DISPLAY:
-//                                CellGrid.statusLineWIsoTime(threadName, "got MODE_DISPLAY");
                                 algorithmDisplayStep();
                                 break;
+                            default:
+                                throw new Exception(
+                                    "Invalid switch statement execution: "
+                                    + "unrecognized int mode flag value "
+                                    + runMode + " placed in queue.")
                         }
                     }
                 }
-//                CellGrid.statusLineWIsoTime(threadName, "queueing FINISHED flag");
                 while (modeFlagQueue.size() == 0) {
                     try {
                         modeFlagQueue.put(FINISHED);
@@ -166,161 +311,192 @@ public class CellGridSection implements Runnable {
                         continue;
                     }
                 }
-//                CellGrid.statusLineWIsoTime(threadName, "notifying main thread");
                 synchronized (threadsToMainMonitor) {
                     threadsToMainMonitor.notify();
                 }
             }
             try {
-//                CellGrid.statusLineWIsoTime(threadName, "waiting on main thread");
                 synchronized (mainToThreadsMonitor) {
                     mainToThreadsMonitor.wait();
                 }
             } catch (InterruptedException exception) {
-//                CellGrid.statusLineWIsoTime(threadName, "wait() interrupted");
+                assert true;
             }
-
         }
     }
 
+    /**
+     * This method clears the displayCells array by setting every value in it to
+     * 0.
+     */
     public void clearCellGrid() {
-        for (int horizIndex = 0; horizIndex < horizDim; horizIndex++)
-            for (int vertIndex = 0; vertIndex < vertDim; vertIndex++)
-                displayCells[horizIndex][vertIndex] = 0;
-    }
-
-    public void seedCellGrid() {
-        ThreadLocalRandom rng = ThreadLocalRandom.current();
-        Iterator<Integer> randomInts = rng.ints((long) horizDim * (long) vertDim).iterator();
-//        CellGrid.statusLineWIsoTime(threadName, "iterating across horizDim " + horizDim + " and vertDim " + vertDim);
         for (int horizIndex = 0; horizIndex < horizDim; horizIndex++) {
             for (int vertIndex = 0; vertIndex < vertDim; vertIndex++) {
+                displayCells[horizIndex][vertIndex] = 0;
+            }
+        }
+    }
+
+    /**
+     * This method populates the displayCells array with randomly chosen 1
+     * values in order to spontaneously create cellular automata before or
+     * during the automata execution. Roughly 1 in 8 cells are set to 1,
+     * regardless of their previous setting.
+     */
+    public void seedCellGrid() {
+        /* ThreadLocalRandom is used to provide a stream of random ints that
+           are used to determine whether a cell should be set to 1 or not. */
+        ThreadLocalRandom rng = ThreadLocalRandom.current();
+        Iterator<Integer> randomInts = rng.ints((long) horizDim * (long) vertDim).iterator();
+        for (int horizIndex = 0; horizIndex < horizDim; horizIndex++) {
+            for (int vertIndex = 0; vertIndex < vertDim; vertIndex++) {
+                /* The int that is returned is in the range [0,
+                   Integer.MAX_VALUE]. That value is divided by
+                   Integer.MAX_VALUE and then multiplied by 8 to rescale it to
+                   (practically) [0,7]. The cell is set to 1 if the value equals
+                   0, a 1-in-8 chance.
+
+                   This statement uses Iterator.next() without checking
+                   hasNext(). But the length of the stream is set to
+                   cellGridHorizDim * cellGridVertDim, which is exactly the
+                   number of cells in the grid, so the iterator lasts exactly
+                   the number of iterations in the combined loops. */
                 if ((int) Math.floor((double) randomInts.next() / (double) Integer.MAX_VALUE * 8) == 0) {
-//                    CellGrid.statusLineWIsoTime(threadName, "setting (" + (originHorizCoord + horizIndex) + ", " + (originVertCoord + vertIndex) + ") to 1");
                     displayCells[horizIndex][vertIndex] = 1;
                 }
             }
         }
     }
 
+    /**
+     * This method is an accessor for the private maxHoriz value.
+     *
+     * @return The int maxHoriz, the maximum value of the horizontal dimension
+     *         of the displayCells array.
+     */
+    public int getMaxHoriz() {
+        return maxHoriz;
+    }
+
+    /**
+     * This method is an accessor for the private maxVert value.
+     *
+     * @return The int maxVert, the maximum value of the vertical dimension of
+     *         the displayCells array.
+     */
+    public int getMaxVert() {
+        return maxVert;
+    }
+
+    /**
+     * This method is an accessor for the private displayCells value.
+     *
+     * @return The int[][] displayCells comprising the region of the composite
+     *         cells grid that this object maintains.
+     */
+    public int[][] getDisplayCells() {
+        return displayCells;
+    }
+
+    /**
+     * This method completes the first step of the 2-step algorithm execution
+     * process, computing the updateCells cell grid array's value from the
+     * neighbors of each cell in the displayCells cell grid array.
+     */
     public void algorithmUpdateStep() {
-        final int[][] deltaPairs = new int[][] { new int[] {-1, -1}, new int[] {-1, 0}, new int[] {-1, +1},
-                                                 new int[] {0, -1},                     new int[] {0, +1},
-                                                 new int[] {+1, -1}, new int[] {+1, 0}, new int[] {+1, +1} };
+        /* This int[][] array of length-2 arrays stores the eight sets of
+           increments & decrements used to adjust the (horizIndex, vertIndex)
+           values to one of eight (moddedHorizIndex, moddedVertIndex) values
+           that can be used to locate a neighbor of the value at (horizIndex,
+           vertIndex) while computing its sumOfNeighbors value. This is done
+           in preference to using 2 further nested for loops in order to avoid
+           having to skip the (0,0) case. */
+        final int[][] deltaPairs = new int[][] {new int[] {-1, -1}, new int[] {-1, 0},
+                                                new int[] {-1, +1}, new int[] {0, -1},
+                                                new int[] {0, +1}, new int[] {+1, -1},
+                                                new int[] {+1, 0}, new int[] {+1, +1}};
+
+        /* This big conditional chain handles all 8 cases where the neigbhoring
+           cells we're looking for are off the edge of this object's cellGrid
+           and are on the edge or in the corner of a neighboring CellGridSection
+           object's displayCells array. It tests for the modded indexes
+           equalling -1 or the dimension of the array (which is 1 above its max
+           index on that dimension). */
         for (int horizIndex = 0; horizIndex < horizDim; horizIndex++) {
             for (int vertIndex = 0; vertIndex < vertDim; vertIndex++) {
                 int sumOfNeighbors = 0;
                 for (int[] deltaPair : deltaPairs) {
                     int moddedHorizIndex = horizIndex + deltaPair[0];
                     int moddedVertIndex = vertIndex + deltaPair[1];
-                    /* This big conditional chain handles all 8 cases where
-                     * the neigbhoring displayCells we're looking for are off
-                     * the edge of this object's cellGrid and are on the
-                     * edge of a neighboring cellGrid's displayCells array. It
-                     * tests for the modded indexes equalling -1 or the
-                     * dimension of the array (which is 1 above its max
-                     * index on that dimension). For each of 8 possible
-                     * neigbhring cellGrids, the correct indexes in *that*
-                     * displayCells array are computed and used to access the
-                     * appropriate neighboring cell to add its value to
-                     * sumOfNeighbors.
-                     */
-void nextgen(unsigned char u0[][W], unsigned char u1[][W+1]) {
 
-    for (int horizIndex = 0; horizIndex < cellsWidth; horizIndex++) {
-        bufferCells[horizIndex][0] = 0;
-    }
-
-    for (int i=0; i<=H; i++)
-        u1[i][0] = 0 ;
-    for (int j=0; j<=W; j++)
-        u1[0][j] = 0 ;
-    for (int i=0; i<H; i++)
-        for (int j=0; j<W; j++)
-            u1[i+1][j+1] = u0[i][j] + u1[i][j+1] + u1[i+1][j] - u1[i][j] ;
-    for (int i=1; i+1<H; i++)
-        for (int j=1; j+1<W; j++) {
-            unsigned char n = u1[i+2][j+2] - u1[i+2][j-1] - u1[i-1][j+2] + u1[i-1][j-1] ;
-            u0[i][j] = (n == 3 || (n == 4 && u0[i][j]))
-        }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
+                    /* For each of 8 possible neigbhring cellGrids, the correct
+                       indexes in *that* displayCells array are computed and
+                       used to access the appropriate neighboring cell to add
+                       its value to sumOfNeighbors. */
                     if (moddedHorizIndex == -1 && moddedVertIndex == -1) {
-                        synchronized (northWestNeighbor.displayCells) {
-                            sumOfNeighbors += northWestNeighbor.displayCells[northWestNeighbor.maxHoriz][northWestNeighbor.maxVert];
+                        synchronized (northWestNeighbor.getDisplayCells()) {
+                            sumOfNeighbors += northWestNeighbor.getDisplayCells()[northWestNeighbor.getMaxHoriz()][northWestNeighbor.getMaxVert()];
                         }
                     } else if (moddedHorizIndex == -1 && moddedVertIndex == vertDim) {
-                        synchronized (southWestNeighbor.displayCells) {
-                            sumOfNeighbors += southWestNeighbor.displayCells[southWestNeighbor.maxHoriz][0];
+                        synchronized (southWestNeighbor.getDisplayCells()) {
+                            sumOfNeighbors += southWestNeighbor.getDisplayCells()[southWestNeighbor.getMaxHoriz()][0];
                         }
                     } else if (moddedHorizIndex == -1) { /* -1 < moddedVertIndex < vertDim */
-                        synchronized (westNeighbor.displayCells) {
-                            sumOfNeighbors += westNeighbor.displayCells[westNeighbor.maxHoriz][moddedVertIndex];
+                        synchronized (westNeighbor.getDisplayCells()) {
+                            sumOfNeighbors += westNeighbor.getDisplayCells()[westNeighbor.getMaxHoriz()][moddedVertIndex];
                         }
-                    } else if (moddedHorizIndex == horizDim &&  moddedVertIndex == -1) {
-                        synchronized (northEastNeighbor.displayCells) {
-                            sumOfNeighbors += northEastNeighbor.displayCells[0][northEastNeighbor.maxVert];
+                    } else if (moddedHorizIndex == horizDim && moddedVertIndex == -1) {
+                        synchronized (northEastNeighbor.getDisplayCells()) {
+                            sumOfNeighbors += northEastNeighbor.getDisplayCells()[0][northEastNeighbor.getMaxVert()];
                         }
-                    } else if (moddedHorizIndex == horizDim &&  moddedVertIndex == vertDim) {
-                        synchronized (southEastNeighbor.displayCells) {
-                            sumOfNeighbors += southEastNeighbor.displayCells[0][0];
+                    } else if (moddedHorizIndex == horizDim && moddedVertIndex == vertDim) {
+                        synchronized (southEastNeighbor.getDisplayCells()) {
+                            sumOfNeighbors += southEastNeighbor.getDisplayCells()[0][0];
                         }
                     } else if (moddedHorizIndex == horizDim) { /* -1 < moddedVertIndex < vertDim */
-                        synchronized (eastNeighbor.displayCells) {
-                            sumOfNeighbors += eastNeighbor.displayCells[0][moddedVertIndex];
+                        synchronized (eastNeighbor.getDisplayCells()) {
+                            sumOfNeighbors += eastNeighbor.getDisplayCells()[0][moddedVertIndex];
                         }
                     } else if (moddedVertIndex == -1) { /* -1 < moddedHorizIndex < horizDim && */
-                        synchronized (northNeighbor.displayCells) {
-                            sumOfNeighbors += northNeighbor.displayCells[moddedHorizIndex][northNeighbor.maxVert];
+                        synchronized (northNeighbor.getDisplayCells()) {
+                            sumOfNeighbors += northNeighbor.getDisplayCells()[moddedHorizIndex][northNeighbor.getMaxVert()];
                         }
-                    } else if (moddedVertIndex == vertDim) { /* -1 < moddedHorizIndex < horizDim && */ 
-                        synchronized (southNeighbor.displayCells) {
-                            sumOfNeighbors += southNeighbor.displayCells[moddedHorizIndex][0];
+                    } else if (moddedVertIndex == vertDim) { /* -1 < moddedHorizIndex < horizDim && */
+                        synchronized (southNeighbor.getDisplayCells()) {
+                            sumOfNeighbors += southNeighbor.getDisplayCells()[moddedHorizIndex][0];
                         }
                     } else { /* -1 < moddedHorizIndex < horizDim && -1 < moddedVertIndex < vertDim */
-                        sumOfNeighbors += displayCells[moddedHorizIndex][moddedVertIndex];
+                        synchronized (displayCells) {
+                            sumOfNeighbors += displayCells[moddedHorizIndex][moddedVertIndex];
+                        }
                     }
                 }
-                /* This variant implementation of the algorithm is documented at
-                 * <https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life#Algorithms>,
-                 * paragraph 3. It simplifies the conditionals by including the
-                 * central cell in the math and testing for only two conditions:
-                 * 
-                 * "[I]f the sum of all nine fields in a given neighbourhood is
-                 * three, the inner field state for the next generation will be
-                 * life; if the all-field sum is four, the inner field retains
-                 * its current state; and every other sum sets the inner field
-                 * to death."
-                 */
-                updateCells[horizIndex][vertIndex] = 1;
-                switch (sumOfNeighbors) {
-                    case 2:
-                        break;
-                    case 3:
-                        updateCells[horizIndex][vertIndex] = 1;
-                        break;
-                    default:
-                        updateCells[horizIndex][vertIndex] = 0;
-                        break;
+
+                /* With sumOfNeighbors computed, the actual algorithm decision
+                   is carried out. If the number of live cells neighboring this
+                   cell is less than 2 or more than 3, the cell is set to 0. If
+                   it equals 3, the cell is set to 1. If it equals 2, the cell
+                   remains set to whatever value it already has (a no-op, so
+                   this if/else cascade doesn't address that possibility. */
+                if (sumOfNeighbors < 2) {
+                    updateCells[horizIndex][vertIndex] = 0;
+                } else if (sumOfNeighbors == 3) {
+                    updateCells[horizIndex][vertIndex] = 1;
+                } else if (sumOfNeighbors >= 4) {
+                    updateCells[horizIndex][vertIndex] = 0;
                 }
             }
         }
-        algorithmStepCounter++;
     }
 
+    /**
+     * This method completes the two-step algorithm by copying every cell from
+     * the buffer array updateCells into the display array displayCells.
+     */
     public void algorithmDisplayStep() {
+        /* This nested for loop iterates across the 2d displayCells array and
+           copies every value in from the equivalent value in the updateCells
+           array. */
         for (int horizIndex = 0; horizIndex < horizDim; horizIndex++) {
             for (int vertIndex = 0; vertIndex < vertDim; vertIndex++) {
                 displayCells[horizIndex][vertIndex] = updateCells[horizIndex][vertIndex];

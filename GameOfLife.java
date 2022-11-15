@@ -58,7 +58,7 @@ public class GameOfLife extends JFrame {
            sets the dimension of the panel. */
         GridBagLayout gameLayout = new GridBagLayout();
         JPanel gamePanel = new JPanel(gameLayout);
-        setContentPanel(gamePanel);
+        setContentPane(gamePanel);
         setSize(windowDims);
 
         /* These calculations derive the dimensions of the button-region (the
@@ -91,8 +91,10 @@ public class GameOfLife extends JFrame {
            constructor. It adds cellGrid as a mouse listener to itself and
            attaches the cell grid with its constraints to the JPanel object.  */
         GridBagConstraints cellGridConstraints = buildCellGridConstraints(0, 0, 1, 5, cellGridRegionDims);
-        Dimension cellGridDims = new Dimension((int) cellGridRegionDims.getWidth() - cellGridConstraints.insets.left - cellGridConstraints.insets.right,
-                                               (int) cellGridRegionDims.getHeight() - cellGridConstraints.insets.top - cellGridConstraints.insets.bottom);
+        Dimension cellGridDims = new Dimension((int) cellGridRegionDims.getWidth() - cellGridConstraints.insets.left
+                                                                                   - cellGridConstraints.insets.right,
+                                               (int) cellGridRegionDims.getHeight() - cellGridConstraints.insets.top
+                                                                                    - cellGridConstraints.insets.bottom);
         cellGrid = new CellGrid(cellGridDims);
         cellGrid.addMouseListener(cellGrid);
         gamePanel.add(cellGrid, cellGridConstraints);
@@ -171,16 +173,21 @@ public class GameOfLife extends JFrame {
      * @see java.awt.Insets
      * @see javax.swing.JComponent
      */
-    private GridBagConstraints buildCellGridConstraints(int row, int col, int rowspan, int colspan, Dimension cellGridRegionDims) {
+    private GridBagConstraints buildCellGridConstraints(final int row, final int col,
+                                                        final int rowspan, final int colspan,
+                                                        final Dimension cellGridRegionDims) {
+        final double CELL_WIDTH = 10D;
+        final double CELL_HEIGHT = 10D;
         GridBagConstraints gameConstraints;
-        int widthExtra = (int) (cellGridRegionDims.getWidth() % 10D);
-        int heightExtra = (int) (cellGridRegionDims.getHeight() % 10D);
+        int widthExtra = (int) (cellGridRegionDims.getWidth() % CELL_WIDTH);
+        int heightExtra = (int) (cellGridRegionDims.getHeight() % CELL_HEIGHT);
         int topInset = 20 + (int) Math.floor((double) heightExtra / 2.0);
         int bottomInset = 0 + (int) Math.ceil((double) heightExtra / 2.0);
         int leftInset = 20 + (int) Math.floor((double) widthExtra / 2.0);
         int rightInset = 20 + (int) Math.ceil((double) widthExtra / 2.0);
         //System.out.println(topInset + ", " + leftInset + ", " + bottomInset + ", " + rightInset);
-        //System.out.println((cellGridRegionDims.getWidth() - leftInset - rightInset) + ", " + (cellGridRegionDims.getHeight() - topInset - bottomInset));
+        /*System.out.println((cellGridRegionDims.getWidth() - leftInset - rightInset) + ", " +
+                             (cellGridRegionDims.getHeight() - topInset - bottomInset)); */
         gameConstraints = buildConstraints(row, col, rowspan, colspan);
         gameConstraints.insets = new Insets(topInset, leftInset, bottomInset, rightInset);
         return gameConstraints;
@@ -205,7 +212,9 @@ public class GameOfLife extends JFrame {
      * @see java.awt.Insets
      * @see javax.swing.JButton
      */
-    private GridBagConstraints buildButtonConstraints(int row, int col, int rowspan, int colspan, Dimension buttonRegionDims) {
+    private GridBagConstraints buildButtonConstraints(final int row, final int col,
+                                                      final int rowspan, final int colspan,
+                                                      final Dimension buttonRegionDims) {
         GridBagConstraints gameConstraints;
         int widthFifth = (int) Math.floor((double) buttonRegionDims.getWidth() / 5.0D);
         int heightFifth = (int) Math.floor((double) buttonRegionDims.getHeight() / 5.0D);
@@ -269,7 +278,7 @@ public class GameOfLife extends JFrame {
      * @param startButton The existing JButton that implements the Start/Stop
      *                    functions.
      * @return            The JButton constructed by the method. */
-    private JButton buildClearButton(JButton startButton) {
+    private JButton buildClearButton(final JButton startButton) {
         JButton button = new JButton("Clear");
         button.addActionListener(new ActionListener() {
             @Override

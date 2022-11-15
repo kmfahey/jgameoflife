@@ -29,27 +29,36 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
     /** This variable holds the length of time in milliseconds that the Timer
         object is instructed to wait between "repaint" events. */
     private final int STEP = 333;
+
     /** This variable holds the default color of the component, as used by
         paintComponent when it renders the component. */
     private final Color FIELD_COLOR = Color.WHITE;
+
     /** This variable is used to store the width of the component, in pixels. */
     private int canvasWidth;
+
     /** This variable is used to store the height of the component, in pixels. */
     private int canvasHeight;
+
     /** This variable is used to store the horizontal dimension of the cell
         grid, in cells. */
     private int cellGridHorizDim;
+
     /** This variable is used to store the vertical dimension of the cell grid,
         in cells. */
     private int cellGridVertDim;
+
     /** This variable is used to store the active cellular automata grid that is
         displayed when the component is rendered. */
     private int[][] displayGrid;
+
     /** This variable is used to store the next generation of the cellular
         automata while it's being calculated. */
     private int[][] updateGrid;
+
     /** This boolean is used to track whether the automata animation is running or not. */
     private boolean automataRunning = false;
+
     /** This Timer object is used to send regular "repaint" events to actionPerformed(). */
     private Timer animationTimer;
 
@@ -63,8 +72,8 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
      *                     these values.
      */
     public CellGrid(final Dimension cellGridDims) {
-        final int CELL_WIDTH = 10D;
-        final int CELL_HEIGHT = 10D;
+        final int CELL_WIDTH = 10;
+        final int CELL_HEIGHT = 10;
 
         canvasWidth = (int) cellGridDims.getWidth();
         canvasHeight = (int) cellGridDims.getHeight();
@@ -103,8 +112,8 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
      * @see java.awt.Graphics
      */
     protected void paintComponent(final Graphics graphics) {
-        final int CELL_WIDTH = 10D;
-        final int CELL_HEIGHT = 10D;
+        final int CELL_WIDTH = 10;
+        final int CELL_HEIGHT = 10;
 
         graphics.setColor(FIELD_COLOR);
         graphics.fillRect(0, 0, getWidth(), getHeight());
@@ -125,9 +134,9 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
            and only blinkers -- would hang and not update while the rest of the
            automata continued to update. I dug into the update algorithm and
            found the correct transformations were being done for the blinkers --
-           it was a display issue.
+           so it was a display issue.
 
-           I found that if I implemented this nested loop, which painted a 10px
+           I found that if I implemented this nested loop, which paints a 10px
            *white* square in the component area for every *0* cell, the issue
            went away. This is a major processing slowdown but I don't know any
            other way to ensure the blinkers issue goes away. */
@@ -227,7 +236,7 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
         int[][] deltaPairs = new int[][] {new int[] {-1, -1}, new int[] {-1, 0}, new int[] {-1, +1},
                                           new int[] {0, -1},                     new int[] {0, +1},
                                           new int[] {+1, -1}, new int[] {+1, 0}, new int[] {+1, +1}};
-        int sumOfNeighborhood = 0;
+        int sumOfNeighbors = 0;
         int moddedHorizIndex;
         int moddedVertIndex;
         int horizIndex;
@@ -240,7 +249,7 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
                every cell in the cell grid. */
             for (horizIndex = 0; horizIndex < cellGridHorizDim; horizIndex++) {
                 for (vertIndex = 0; vertIndex < cellGridVertDim; vertIndex++) {
-                    sumOfNeighborhood = 0;
+                    sumOfNeighbors = 0;
                     /* The coordinate delta values in deltaPairs are used to
                        compute from the cell coordinates into the coordinates of
                        every neighboring cell. */
@@ -256,12 +265,12 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
                                                : moddedHorizIndex;
                         moddedVertIndex = (moddedVertIndex == -1) ? cellGridVertDim - 1
                                                : (moddedVertIndex == cellGridVertDim) ? 0 : moddedVertIndex;
-                        sumOfNeighborhood += displayGrid[moddedHorizIndex][moddedVertIndex];
+                        sumOfNeighbors += displayGrid[moddedHorizIndex][moddedVertIndex];
                     }
                     /* The cell in the grid is set to 1 if the neighboring cells
                        sum to 3, or to its existing value if they sum to 2, or
                        otherwise it's set to 0. */
-                    updateGrid[horizIndex][vertIndex] = (sumOfNeighborhood == 3) ? 1 : (sumOfNeighborhood == 2) ? updateGrid[horizIndex][vertIndex] : 0;
+                    updateGrid[horizIndex][vertIndex] = (sumOfNeighbors == 3) ? 1 : (sumOfNeighbors == 2) ? updateGrid[horizIndex][vertIndex] : 0;
                 }
             }
 
@@ -298,8 +307,6 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
         final double CELL_HEIGHT = 10D;
         int horizCoord;
         int vertCoord;
-
-        //System.out.println("Mouse clicked event!");
 
         /* The cells are 10 pixels on a side, so the X and Y values on the
            MouseEvent object are interpreted to coordinates in the cell grid by
