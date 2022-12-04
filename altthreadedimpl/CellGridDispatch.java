@@ -1,4 +1,4 @@
-package com.kmfahey.jgameoflife.altthreadedimpl;
+package org.magentatobe.jgameoflife.altthreadedimpl;
 
 import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -15,8 +15,8 @@ import java.util.Objects;
  * CellGrid object, and uses the CellGridSection objects that it suppplies to
  * this class's constructor.
  *
- * @see com.kmfahey.jgameoflife.altthreadedimpl.CellGrid
- * @see com.kmfahey.jgameoflife.altthreadedimpl.CellGridSection
+ * @see org.magentatobe.jgameoflife.altthreadedimpl.CellGrid
+ * @see org.magentatobe.jgameoflife.altthreadedimpl.CellGridSection
  */
 public class CellGridDispatch {
 
@@ -56,8 +56,8 @@ public class CellGridDispatch {
      *
      * @param sectionObjs A 2d array of CellGridSection objects, which this
      *                    object will delegate tasks to.
-     * @see com.kmfahey.jgameoflife.altthreadedimpl.CellGrid
-     * @see com.kmfahey.jgameoflife.altthreadedimpl.CellGridSection
+     * @see org.magentatobe.jgameoflife.altthreadedimpl.CellGrid
+     * @see org.magentatobe.jgameoflife.altthreadedimpl.CellGridSection
      */
     public CellGridDispatch(final CellGridSection[][] sectionObjs) {
         /* This iterator variable is used across two for loops looping on other
@@ -142,7 +142,7 @@ public class CellGridDispatch {
      * @param runMode An integer flag, one of CellGridSection.MODE_CLEAR,
      *                CellGridSection.MODE_SEED, CellGridSection.MODE_DISPLAY,
      *                CellGridSection.MODE_or UPDATE.
-     * @see com.kmfahey.jgameoflife.altthreadedimpl.CellGridSection
+     * @see org.magentatobe.jgameoflife.altthreadedimpl.CellGridSection
      */
     public void delegateRunMode(final int runMode) {
         final int sleepIntervalMillis = 10;

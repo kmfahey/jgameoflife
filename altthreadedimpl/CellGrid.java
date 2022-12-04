@@ -1,4 +1,4 @@
-package com.kmfahey.jgameoflife.altthreadedimpl;
+package org.magentatobe.jgameoflife.altthreadedimpl;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -20,9 +20,9 @@ import javax.swing.Timer;
  * inter-thread communication to dispatch cell grid alteration directives to
  * them.
  *
- * @see com.kmfahey.jgameoflife.altthreadedimpl.GameOfLife
- * @see com.kmfahey.jgameoflife.altthreadedimpl.CellGridDispatch
- * @see com.kmfahey.jgameoflife.altthreadedimpl.CellGridSection
+ * @see org.magentatobe.jgameoflife.altthreadedimpl.GameOfLife
+ * @see org.magentatobe.jgameoflife.altthreadedimpl.CellGridDispatch
+ * @see org.magentatobe.jgameoflife.altthreadedimpl.CellGridSection
  */
 public class CellGrid extends JComponent implements ActionListener, MouseListener {
 
@@ -128,7 +128,7 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
      * cellGridSections with them. * It * was refactored out of the constructor
      * in order to shorten its length and * make its logic easier to read.
      *
-     * @see com.kmfahey.jgameoflife.altthreadedimpl.CellGridSection
+     * @see org.magentatobe.jgameoflife.altthreadedimpl.CellGridSection
      */
     private void instantiateCellGridSectionObjects() {
 
@@ -204,7 +204,7 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
      * was refactored out of the constructor in order to shorten its length and
      * make its logic easier to read.
      *
-     * @see com.kmfahey.jgameoflife.altthreadedimpl.CellGridSection
+     * @see org.magentatobe.jgameoflife.altthreadedimpl.CellGridSection
      */
     private void setCellGridSectionNeighbors() {
 
@@ -450,7 +450,7 @@ public class CellGrid extends JComponent implements ActionListener, MouseListene
      *              cellular automata animates. Its getActionCommand() method
      *              should equal "repaint".
      * @see javax.swing.Timer
-     * @see com.kmfahey.jgameoflife.altthreadedimpl.CellGridDispatch
+     * @see org.magentatobe.jgameoflife.altthreadedimpl.CellGridDispatch
      */
     public void actionPerformed(final ActionEvent event) {
         if (event.getActionCommand().equals("repaint")) {

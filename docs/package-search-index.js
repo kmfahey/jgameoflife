@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.kmfahey.jgameoflife"},{"l":"com.kmfahey.jgameoflife.altthreadedimpl"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"org.magentatobe.jgameoflife"},{"l":"org.magentatobe.jgameoflife.altthreadedimpl"}];updateSearchResults();

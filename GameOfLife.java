@@ -1,4 +1,4 @@
-package com.kmfahey.jgameoflife;
+package org.magentatobe.jgameoflife;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -17,7 +17,7 @@ import javax.swing.JPanel;
  * the exception of the JComponent subclass CellGrid which implements the
  * viewable area where the cellular automata run.
  *
- * @see com.kmfahey.jgameoflife.CellGrid
+ * @see org.magentatobe.jgameoflife.CellGrid
  * @see javax.swing.JFrame
  */
 public class GameOfLife extends JFrame {

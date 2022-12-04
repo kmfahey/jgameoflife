@@ -17,7 +17,7 @@
  * java.util.concurrent.ArrayBlockingQueue&lt;Integer&gt; objects.
  *
  * @since 0.9
- * @author Kerne M. Fahey
+ * @author MagentaToBe
  * @version 0.9
  */
-package com.kmfahey.jgameoflife.altthreadedimpl;
+package org.magentatobe.jgameoflife.altthreadedimpl;
