@@ -1,4 +1,4 @@
-package org.magentatobe.jgameoflife.altthreadedimpl;
+package org.kmfahey.jgameoflife.altthreadedimpl;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CyclicBarrier;
@@ -13,8 +13,8 @@ import java.util.Iterator;
  * calculations of the sum of neighboring cells for cells located on the edge or
  * in the corner of the region of the cells grid that it maintains.
  *
- * @see org.magentatobe.jgameoflife.altthreadedimpl.CellGrid
- * @see org.magentatobe.jgameoflife.altthreadedimpl.CellGridDispatch
+ * @see org.kmfahey.jgameoflife.altthreadedimpl.CellGrid
+ * @see org.kmfahey.jgameoflife.altthreadedimpl.CellGridDispatch
  */
 public class CellGridSection implements Runnable {
 
@@ -78,54 +78,54 @@ public class CellGridSection implements Runnable {
 
     /** This CellGridSection object is the one that neighbors this object
         to the north.
-        @see org.magentatobe.jgameoflife.altthreadedimpl.CellGrid */
+        @see org.kmfahey.jgameoflife.altthreadedimpl.CellGrid */
     private CellGridSection northNeighbor;
 
     /** This CellGridSection object is the one that neighbors this object
         to the northeast.
-        @see org.magentatobe.jgameoflife.altthreadedimpl.CellGrid */
+        @see org.kmfahey.jgameoflife.altthreadedimpl.CellGrid */
     private CellGridSection northEastNeighbor;
 
     /** This CellGridSection object is the one that neighbors this object
         to the east.
-        @see org.magentatobe.jgameoflife.altthreadedimpl.CellGrid */
+        @see org.kmfahey.jgameoflife.altthreadedimpl.CellGrid */
     private CellGridSection eastNeighbor;
 
     /** This CellGridSection object is the one that neighbors this object
         to the southeast.
-        @see org.magentatobe.jgameoflife.altthreadedimpl.CellGrid */
+        @see org.kmfahey.jgameoflife.altthreadedimpl.CellGrid */
     private CellGridSection southEastNeighbor;
 
     /** This CellGridSection object is the one that neighbors this object
         to the south.
-        @see org.magentatobe.jgameoflife.altthreadedimpl.CellGrid */
+        @see org.kmfahey.jgameoflife.altthreadedimpl.CellGrid */
     private CellGridSection southNeighbor;
 
     /** This CellGridSection object is the one that neighbors this object
         to the southwest.
-        @see org.magentatobe.jgameoflife.altthreadedimpl.CellGrid */
+        @see org.kmfahey.jgameoflife.altthreadedimpl.CellGrid */
     private CellGridSection southWestNeighbor;
 
     /** This CellGridSection object is the one that neighbors this object
         to the west.
-        @see org.magentatobe.jgameoflife.altthreadedimpl.CellGrid */
+        @see org.kmfahey.jgameoflife.altthreadedimpl.CellGrid */
     private CellGridSection westNeighbor;
 
     /** This CellGridSection object is the one that neighbors this object
         to the northwest.
-        @see org.magentatobe.jgameoflife.altthreadedimpl.CellGrid */
+        @see org.kmfahey.jgameoflife.altthreadedimpl.CellGrid */
     private CellGridSection northWestNeighbor;
 
     /** This Object is the monitor object this object running in a worker thread
         wait()s on, and the main thread notifyAll()s on. This object does not
         notify() on it.
-        @see org.magentatobe.jgameoflife.altthreadedimpl.CellGridDispatch */
+        @see org.kmfahey.jgameoflife.altthreadedimpl.CellGridDispatch */
     private Object mainToThreadsMonitor;
 
     /** This Object is the monitor object used by this object running in a
         worker thread to notify() the main thread. This object does not wait()
         on it.
-        @see org.magentatobe.jgameoflife.altthreadedimpl.CellGridDispatch */
+        @see org.kmfahey.jgameoflife.altthreadedimpl.CellGridDispatch */
     private Object threadsToMainMonitor;
 
     /** This int[][] array is the alternate hidden cell grid used in
@@ -138,7 +138,7 @@ public class CellGridSection implements Runnable {
         that represent 'dead' and 'live' cells, and is the array consulted by
         CellGrid when it's rendering the cells grid to the viewable area of the
         GUI.
-        @see org.magentatobe.jgameoflife.altthreadedimpl.CellGrid */
+        @see org.kmfahey.jgameoflife.altthreadedimpl.CellGrid */
     private volatile int[][] displayCells;
 
     /** This int is the number of cells in the vertical dimension of the
@@ -181,7 +181,7 @@ public class CellGridSection implements Runnable {
      * @param originVertCoordVal  The vertical coordinate of the upper left
      *                            corner of this object's cells grid in the
      *                            composite cells grid it is a part of.
-     * @see org.magentatobe.jgameoflife.altthreadedimpl.CellGrid
+     * @see org.kmfahey.jgameoflife.altthreadedimpl.CellGrid
      */
     public CellGridSection(final int cellsWidth, final int cellsHeight,
                            final int originHorizCoordVal, final int originVertCoordVal) {
@@ -208,7 +208,7 @@ public class CellGridSection implements Runnable {
      *                         flags back and forth between this object's run()
      *                         method in a worker thread and CellGridDispatch
      *                         running in the main thread.
-     * @see org.magentatobe.jgameoflife.altthreadedimpl.CellGridDispatch
+     * @see org.kmfahey.jgameoflife.altthreadedimpl.CellGridDispatch
      */
     public void setModeFlagQueue(final ArrayBlockingQueue<Integer> modeFlagQueueVar) {
         modeFlagQueue = modeFlagQueueVar;
@@ -227,7 +227,7 @@ public class CellGridSection implements Runnable {
      *                                in the main thread calls wait() on and
      *                                this object in a worker thread calls
      *                                notify() on.
-     * @see org.magentatobe.jgameoflife.altthreadedimpl.CellGridDispatch
+     * @see org.kmfahey.jgameoflife.altthreadedimpl.CellGridDispatch
      */
     public void setMonitors(final Object mainToThreadsMonitorObj, final Object threadsToMainMonitorObj) {
         mainToThreadsMonitor = mainToThreadsMonitorObj;
@@ -245,7 +245,7 @@ public class CellGridSection implements Runnable {
      * @param neighborGrid The neighboring CellGridSection object.
      * @param dirFlag      One of the constants NORTH, NORTHEAST, EAST,
      *                     SOUTHEAST, SOUTH, SOUTHWEST, WEST, or NORTHWEST.
-     * @see org.magentatobe.jgameoflife.altthreadedimpl.CellGridDispatch
+     * @see org.kmfahey.jgameoflife.altthreadedimpl.CellGridDispatch
      */
     public void setNeighbor(final CellGridSection neighborGrid, final int dirFlag) {
         switch (dirFlag) {

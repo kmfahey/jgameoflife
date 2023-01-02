@@ -1,4 +1,4 @@
-package org.magentatobe.jgameoflife;
+package org.kmfahey.jgameoflife;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -20,7 +20,7 @@ import javax.swing.Timer;
  * so that it can detect and respond to mouse clicks in the component area by
  * inverting the value of the cell clicked on.
  *
- * @see org.magentatobe.jgameoflife.GameOfLife
+ * @see org.kmfahey.jgameoflife.GameOfLife
  * @see javax.swing.JComponent
  * @see javax.swing.Timer
  * @see java.awt.event.MouseListener

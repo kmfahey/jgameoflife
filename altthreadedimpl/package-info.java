@@ -20,4 +20,4 @@
  * @author MagentaToBe
  * @version 0.9
  */
-package org.magentatobe.jgameoflife.altthreadedimpl;
+package org.kmfahey.jgameoflife.altthreadedimpl;

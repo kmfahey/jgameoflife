@@ -18,4 +18,4 @@
  * @author MagentaToBe
  * @version 0.9
  */
-package org.magentatobe.jgameoflife;
+package org.kmfahey.jgameoflife;
